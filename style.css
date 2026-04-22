@@ -1,0 +1,678 @@
+:root {
+    /* Primary Colors */
+    --primary-green: #2ECC71;
+    --primary-blue: #3498DB;
+    --primary-dark: #2C3E50;
+    
+    /* Backgrounds */
+    --bg-soft-white: #F8FAFC;
+    --bg-white: #FFFFFF;
+    --bg-light-blue: #EBF5FB;
+    --bg-light-green: #EAFAF1;
+    
+    /* Neutral */
+    --text-primary: #1E293B;
+    --text-secondary: #64748B;
+    --border-color: #E2E8F0;
+    
+    /* Shadows */
+    --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    
+    /* Utils */
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Dark Mode Colors */
+    --dark-bg: #0F172A;
+    --dark-card: #1E293B;
+    --dark-text: #F8FAFC;
+    --dark-text-secondary: #94A3B8;
+    --dark-border: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode {
+    --bg-soft-white: var(--dark-bg);
+    --bg-white: var(--dark-card);
+    --text-primary: var(--dark-text);
+    --text-secondary: var(--dark-text-secondary);
+    --border-color: var(--dark-border);
+}
+
+body.dark-mode .top-nav {
+    background: rgba(15, 23, 42, 0.8);
+    border-color: var(--dark-border);
+}
+
+body.dark-mode .nav-links a {
+    color: var(--dark-text);
+}
+
+body.dark-mode .card,
+body.dark-mode .comparison-table,
+body.dark-mode .mock-chart {
+    background: var(--dark-card);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', 'Inter', sans-serif;
+}
+
+body {
+    background-color: var(--bg-soft-white);
+    color: var(--text-primary);
+    overflow: hidden;
+}
+
+/* Slide Container */
+.deck-container {
+    height: 100vh;
+    width: 100vw;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+}
+
+.slide {
+    height: 100vh;
+    width: 100vw;
+    scroll-snap-align: start;
+    padding: 4rem 8rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    background-color: var(--bg-white);
+}
+
+.slide:nth-child(even) {
+    background-color: var(--bg-soft-white);
+}
+
+/* Typography */
+h1 {
+    font-size: 3.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+    color: var(--primary-dark);
+}
+
+h2 {
+    font-size: 2.8rem;
+    font-weight: 700;
+    margin-bottom: 3rem;
+    color: var(--primary-dark);
+    position: relative;
+    display: inline-block;
+}
+
+h2::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background: var(--primary-green);
+    border-radius: 2px;
+}
+
+h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+p {
+    font-size: 1.125rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+}
+
+.tagline {
+    color: var(--primary-blue);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+/* Layout Helpers */
+.grid { display: grid; gap: 2.5rem; }
+.grid-2 { grid-template-columns: 1fr 1fr; }
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+.flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card {
+    background: var(--bg-white);
+    padding: 2.5rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+    border: 1px solid rgba(0,0,0,0.02);
+}
+
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Buttons */
+.btn {
+    padding: 1rem 2.5rem;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    font-size: 1.1rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-blue), #2980B9);
+    color: white;
+}
+
+/* Navigation Bar */
+.top-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 1.5rem 8rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.logo-text {
+    font-size: 1.8rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.theme-toggle {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.theme-toggle:hover {
+    color: var(--primary-blue);
+    transform: rotate(15deg);
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: var(--transition);
+}
+
+.nav-links a:hover {
+    color: var(--primary-blue);
+}
+
+.btn-sm {
+    padding: 0.6rem 1.5rem;
+    font-size: 0.9rem;
+}
+
+/* Adjust slides for nav bar */
+.slide {
+    padding-top: 9rem; /* Increased padding */
+}
+
+#slide-cover .content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    width: 100%;
+}
+
+/* Icons */
+.icon-box {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-md);
+    background: var(--bg-light-blue);
+    color: var(--primary-blue);
+    font-size: 28px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-box.green {
+    background: var(--bg-light-green);
+    color: var(--primary-green);
+}
+
+/* Mockups Custom CSS */
+.iphone-frame {
+    width: 280px; /* Adjusted size */
+    height: 560px; /* Adjusted size */
+    background: #1e293b;
+    border: 10px solid #0f172a;
+    border-radius: 40px;
+    padding: 0;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+body.dark-mode .iphone-frame {
+    border-color: #334155;
+}
+
+.iphone-frame.small {
+    width: 200px;
+    height: 400px;
+    border-radius: 30px;
+    border-width: 6px;
+}
+
+.iphone-screen {
+    width: 100%;
+    height: 100%;
+    background: #f8fafc;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Realistic App UI inside mockups */
+.app-bar {
+    padding: 20px 15px 15px;
+    background: white;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.search-mini {
+    background: #f1f5f9;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.6rem;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.flow-arrow {
+    font-size: 2.5rem;
+    color: #cbd5e1;
+    animation: bounceRight 2s infinite;
+}
+
+@keyframes bounceRight {
+    0%, 20%, 50%, 80%, 100% {transform: translateX(0);}
+    40% {transform: translateX(10px);}
+    60% {transform: translateX(5px);}
+}
+
+/* Progress Indicator */
+.nav-dots {
+    position: fixed;
+    right: 3rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    z-index: 100;
+}
+
+.nav-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.nav-dot.active {
+    background: var(--primary-blue);
+    transform: scale(1.5);
+}
+
+
+.logo-dot {
+    width: 14px;
+    height: 14px;
+    background: var(--primary-green);
+    border-radius: 50%;
+}
+
+.logo-text span { color: var(--primary-blue); }
+
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+}
+
+.comparison-table th, .comparison-table td {
+    padding: 1.5rem 2rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.comparison-table th {
+    background: var(--bg-light-blue);
+    color: var(--primary-blue);
+    font-weight: 700;
+}
+
+.mock-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 1.5rem;
+    height: 300px;
+    padding: 2rem;
+    background: white;
+    border-radius: var(--radius-lg);
+}
+
+.bar {
+    width: 50px;
+    background: #f1f5f9;
+    border-radius: 8px 8px 2px 2px;
+}
+
+.bar.highlighted {
+    background: linear-gradient(to top, var(--primary-blue), #5dade2);
+}
+
+.roadmap-line {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4rem;
+    position: relative;
+}
+
+.roadmap-line::after {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--bg-light-blue);
+    z-index: 0;
+}
+
+.roadmap-point {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+}
+
+.point-circle {
+    width: 40px;
+    height: 40px;
+    background: white;
+    border: 4px solid var(--primary-blue);
+    border-radius: 50%;
+    margin: 0 auto 1.5rem;
+}
+
+.step-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: white;
+    border: 3px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.step-circle.active {
+    background: var(--primary-green);
+    color: white;
+    border-color: var(--primary-green);
+}
+
+.avatar {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+    border-radius: 50%;
+    margin: 0 auto 1.5rem;
+}
+
+/* Animations */
+.slide > * {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.8s ease;
+}
+
+.slide.visible > * {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Mobile Menu Toggle */
+.mobile-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 5px;
+    transition: var(--transition);
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .slide {
+        padding: 4rem 4rem;
+    }
+    
+    .top-nav {
+        padding: 1rem 4rem;
+    }
+    
+    h1 { font-size: 3rem; }
+    h2 { font-size: 2.2rem; }
+}
+
+@media (max-width: 768px) {
+    body {
+        overflow-y: auto;
+    }
+    
+    .deck-container {
+        scroll-snap-type: none;
+        height: auto;
+    }
+    
+    .slide {
+        height: auto;
+        min-height: 100vh;
+        padding: 6rem 1.5rem 4rem;
+    }
+    
+    .top-nav {
+        padding: 1rem 1.5rem;
+    }
+    
+    .mobile-menu-toggle {
+        display: block;
+    }
+    
+    .nav-links {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 80%;
+        height: 100vh;
+        background: var(--bg-white);
+        flex-direction: column;
+        justify-content: center;
+        gap: 2.5rem;
+        transition: 0.4s ease-in-out;
+        box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+        z-index: 1001;
+    }
+    
+    .nav-links.active {
+        right: 0;
+    }
+    
+    .nav-dots {
+        display: none;
+    }
+    
+    .grid-2, .grid-3, .grid-4 {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    /* Fix Journey Line for Mobile */
+    .step-line {
+        display: none;
+    }
+
+    .step-item {
+        margin-bottom: 2rem;
+    }
+    
+    h1 { font-size: 2.5rem; }
+    h2 { font-size: 2rem; margin-bottom: 2rem; }
+    
+    #slide-cover .content {
+        flex-direction: column;
+        text-align: center;
+        gap: 3rem;
+    }
+    
+    .iphone-frame {
+        width: 240px;
+        height: 480px;
+        margin: 0 auto;
+    }
+    
+    .iphone-frame.small {
+        width: 160px;
+        height: 320px;
+    }
+    
+    .flow-arrow {
+        transform: rotate(90deg);
+        margin: 1rem 0;
+    }
+    
+    .comparison-table {
+        display: block;
+        overflow-x: auto;
+    }
+    
+    .roadmap-line {
+        flex-direction: column;
+        gap: 3rem;
+        margin-top: 2rem;
+    }
+    
+    .roadmap-line::after {
+        left: 20px;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        height: 100%;
+    }
+    
+    .roadmap-point {
+        text-align: left;
+        padding-left: 60px;
+    }
+    
+    .point-circle {
+        position: absolute;
+        left: 0;
+        top: 0;
+        margin: 0;
+    }
+    
+    .market-stats {
+        text-align: center;
+    }
+    
+    .stat-box h1 { font-size: 3.5rem; }
+    .stat-box h2 { font-size: 3rem; }
+    
+    .card {
+        padding: 1.5rem;
+    }
+    
+    .flex-center {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 { font-size: 2.2rem; }
+    h2 { font-size: 1.8rem; }
+    p { font-size: 1rem; }
+    
+    .btn {
+        width: 100%;
+        padding: 1rem;
+    }
+    
+    .iphone-frame {
+        width: 200px;
+        height: 400px;
+    }
+}
