@@ -476,6 +476,18 @@ body.dark-mode .iphone-frame {
     border-color: var(--primary-green);
 }
 
+.stat-value {
+    color: var(--primary-blue);
+    font-size: 5rem;
+    margin-bottom: 0;
+    font-weight: 800;
+}
+
+.stat-value.green {
+    color: var(--primary-green);
+    font-size: 4rem;
+}
+
 .avatar {
     width: 100px;
     height: 100px;
@@ -590,7 +602,38 @@ body.dark-mode .iphone-frame {
     }
     
     h1 { font-size: 2.5rem; }
-    h2 { font-size: 2rem; margin-bottom: 2rem; }
+    h2 { 
+        font-size: 2rem; 
+        margin-bottom: 2rem;
+        text-align: center;
+        display: block;
+        width: 100%;
+    }
+
+    h2::after {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .slide {
+        text-align: center;
+    }
+
+    .card {
+        text-align: center;
+    }
+
+    .feature-item {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .icon-box {
+        margin-left: auto;
+        margin-right: auto;
+    }
     
     #slide-cover .content {
         flex-direction: column;
@@ -603,10 +646,28 @@ body.dark-mode .iphone-frame {
         height: 480px;
         margin: 0 auto;
     }
-    
+
     .iphone-frame.small {
         width: 160px;
         height: 320px;
+    }
+    
+    .solution-card {
+        border-left: none !important;
+        border-top: 5px solid var(--primary-green);
+    }
+    
+    .solution-card:first-child {
+        border-top-color: #e74c3c;
+    }
+
+    .solution-card ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .solution-card li {
+        margin-bottom: 0.5rem;
     }
     
     .flow-arrow {
@@ -634,23 +695,21 @@ body.dark-mode .iphone-frame {
     }
     
     .roadmap-point {
-        text-align: left;
-        padding-left: 60px;
+        text-align: center;
+        padding-left: 0;
+        padding-top: 60px;
     }
     
     .point-circle {
         position: absolute;
-        left: 0;
+        left: 50%;
         top: 0;
+        transform: translateX(-50%);
         margin: 0;
     }
     
-    .market-stats {
-        text-align: center;
-    }
-    
-    .stat-box h1 { font-size: 3.5rem; }
-    .stat-box h2 { font-size: 3rem; }
+    .stat-value { font-size: 3.5rem; }
+    .stat-value.green { font-size: 3rem; }
     
     .card {
         padding: 1.5rem;
