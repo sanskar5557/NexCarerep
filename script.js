@@ -133,6 +133,12 @@ function loadAuthState() {
         document.getElementById('pd-email').textContent    = user.email || '—';
         document.getElementById('pd-phone').textContent    = user.phone || '—';
         document.getElementById('pd-joined').textContent   = user.joined ? 'Joined ' + user.joined : '—';
+
+        // Point "My Dashboard" to the right page
+        const dashLink = document.getElementById('pd-dashboard-link');
+        if (dashLink) {
+            dashLink.href = (user.role||'').toLowerCase() === 'doctor' ? 'doctor-dashboard.html' : 'patient-dashboard.html';
+        }
     } else {
         loginBtn.style.display = '';
         profileBtn.style.display = 'none';

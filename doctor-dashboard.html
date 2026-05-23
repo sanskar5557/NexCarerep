@@ -57,6 +57,13 @@
             font-size:0.85rem;font-weight:600;cursor:pointer;display:flex;
             align-items:center;justify-content:center;gap:8px;transition:var(--tr);}
         .btn-logout:hover{background:rgba(239,68,68,0.2);}
+        .btn-home{width:100%;padding:0.65rem;margin-bottom:0.6rem;
+            background:rgba(52,152,219,0.1);color:var(--blue);
+            border:1px solid rgba(52,152,219,0.2);border-radius:var(--radius-sm);
+            font-size:0.85rem;font-weight:600;display:flex;
+            align-items:center;justify-content:center;gap:8px;
+            transition:var(--tr);text-decoration:none;}
+        .btn-home:hover{background:rgba(52,152,219,0.2);color:#5dade2;}
 
         /* ── Main ── */
         .main{margin-left:260px;flex:1;padding:2rem;min-height:100vh;}
@@ -158,6 +165,85 @@
         @media(max-width:1100px){.stats-grid{grid-template-columns:repeat(2,1fr);}
             .dash-grid{grid-template-columns:1fr;}}
         @media(max-width:768px){.sidebar{width:200px;}.main{margin-left:200px;}}
+
+        /* A4 Prescription Template */
+        .a4-prescription {
+            background: #ffffff;
+            color: #333333;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto 2rem auto;
+            padding: 2.5rem 3rem;
+            border-radius: 4px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        .a4-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid var(--blue);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .a4-doc-info h2 { color: var(--blue-dark); font-size: 1.5rem; font-weight: 700; margin-bottom: 0.2rem; }
+        .a4-doc-info p { font-size: 0.85rem; color: #555; line-height: 1.4; margin-bottom: 2px; }
+        .a4-clinic-logo {
+            font-size: 1.4rem; font-weight: 800; color: #333;
+            display:flex; align-items:center; gap: 6px;
+        }
+        .a4-clinic-logo .dot { width:12px;height:12px;background:var(--green);border-radius:50%; }
+        .a4-clinic-logo span { color: var(--blue); }
+        .a4-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 4px;
+            border: 1px solid #e9ecef;
+        }
+        .a4-meta p { margin-bottom: 0.3rem; color: #444; }
+        .a4-meta strong { color: #111; }
+        .a4-rx { font-size: 2.5rem; font-weight: bold; color: var(--blue); line-height: 1; margin-bottom: 1rem; font-family: serif; font-style: italic; }
+        .a4-notes {
+            min-height: 200px;
+            font-size: 0.95rem; line-height: 1.8; color: #222;
+            white-space: pre-wrap;
+            padding: 0.5rem;
+        }
+        .a4-footer {
+            margin-top: 3rem;
+            border-top: 1px solid #ddd;
+            padding-top: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            font-size: 0.85rem; color: #666;
+        }
+        .a4-sign { text-align: center; }
+        .a4-sign-line { width: 160px; border-bottom: 1px dashed #999; margin-bottom: 8px; height: 40px; }
+        
+        @media print {
+            body * { visibility: hidden; }
+            .a4-prescription, .a4-prescription * { visibility: visible; }
+            .a4-prescription { position: absolute; left: 0; top: 0; box-shadow: none; width: 100%; max-width: 100%; }
+            .sidebar, .topbar { display: none !important; }
+            .main { margin-left: 0 !important; padding: 0 !important; }
+        }
+
+        /* Tabs */
+        .tab-pane { display: none; animation: fadeInTab 0.3s ease; }
+        .tab-pane.active { display: block; }
+        @keyframes fadeInTab {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .empty-state { text-align: center; padding: 4rem 2rem; color: var(--muted); }
+        .empty-state i { font-size: 3rem; color: rgba(255,255,255,0.1); margin-bottom: 1rem; }
+        .empty-state h3 { color: var(--text); font-size: 1.2rem; margin-bottom: 0.5rem; }
     </style>
 </head>
 <body>
@@ -174,17 +260,20 @@
     </div>
     <nav class="sb-nav">
         <div class="sb-label">Main</div>
-        <a class="sb-link active"><i class="fas fa-house"></i> Dashboard</a>
-        <a class="sb-link"><i class="fas fa-calendar-days"></i> Schedule<span class="sb-badge-count">3</span></a>
-        <a class="sb-link"><i class="fas fa-users"></i> My Patients</a>
-        <a class="sb-link"><i class="fas fa-file-waveform"></i> Prescriptions</a>
+        <a class="sb-link active" onclick="switchTab('dashboard', this)"><i class="fas fa-house"></i> Dashboard</a>
+        <a class="sb-link" onclick="switchTab('schedule', this)"><i class="fas fa-calendar-days"></i> Schedule<span class="sb-badge-count">3</span></a>
+        <a class="sb-link" onclick="switchTab('patients', this)"><i class="fas fa-users"></i> My Patients</a>
+        <a class="sb-link" onclick="switchTab('prescriptions', this)"><i class="fas fa-file-waveform"></i> Prescriptions</a>
         <div class="sb-label">Tools</div>
-        <a class="sb-link"><i class="fas fa-message"></i> Messages<span class="sb-badge-count">2</span></a>
-        <a class="sb-link"><i class="fas fa-indian-rupee-sign"></i> Earnings</a>
-        <a class="sb-link"><i class="fas fa-bell"></i> Notifications</a>
-        <a class="sb-link"><i class="fas fa-gear"></i> Settings</a>
+        <a class="sb-link" onclick="switchTab('messages', this)"><i class="fas fa-message"></i> Messages<span class="sb-badge-count">2</span></a>
+        <a class="sb-link" onclick="switchTab('earnings', this)"><i class="fas fa-indian-rupee-sign"></i> Earnings</a>
+        <a class="sb-link" onclick="switchTab('notifications', this)"><i class="fas fa-bell"></i> Notifications</a>
+        <a class="sb-link" onclick="switchTab('settings', this)"><i class="fas fa-gear"></i> Settings</a>
     </nav>
     <div class="sb-footer">
+        <a href="index.html" class="btn-home">
+            <i class="fas fa-globe"></i> Back to Website
+        </a>
         <button class="btn-logout" onclick="logoutUser()">
             <i class="fas fa-right-from-bracket"></i> Logout
         </button>
@@ -203,11 +292,13 @@
             <div class="status-pill" onclick="toggleStatus(this)">
                 <div class="status-dot"></div> Available
             </div>
-            <div class="icon-btn"><i class="fas fa-bell"></i></div>
-            <div class="icon-btn"><i class="fas fa-message"></i></div>
+            <div class="icon-btn" onclick="alert('No new notifications')"><i class="fas fa-bell"></i></div>
+            <div class="icon-btn" onclick="alert('Messaging module coming soon!')"><i class="fas fa-message"></i></div>
         </div>
     </div>
 
+    <!-- Tabs Container -->
+    <div id="view-dashboard" class="tab-pane active">
     <!-- Stats -->
     <div class="stats-grid">
         <div class="stat-card">
@@ -233,97 +324,22 @@
         <div>
             <div class="section-hdr">
                 <span class="sec-title">Today's Schedule</span>
-                <button class="see-all">Manage →</button>
+                <button class="see-all" onclick="alert('Schedule management coming soon!')">Manage →</button>
             </div>
-            <div class="sched-list">
-
-                <div class="sched-card">
-                    <div class="sched-time"><div class="t">9:00</div><div class="d">AM</div></div>
-                    <div class="sched-sep"></div>
-                    <div class="pat-avatar" style="background:linear-gradient(135deg,#3498db,#2471a3);">RS</div>
-                    <div class="sched-info">
-                        <div class="sched-name">Rahul Sharma</div>
-                        <div class="sched-reason">Chest pain follow-up · 30 min</div>
-                    </div>
-                    <span class="sched-badge sb-followup">Follow-up</span>
-                    <div class="action-btns">
-                        <button class="act-btn act-accept" onclick="alert('Starting consultation...')">Start</button>
-                    </div>
+            <div class="sched-list" id="todays-schedule-list">
+                <div class="panel empty-state" style="padding: 2rem 1rem; border: none; background: transparent; text-align: left;">
+                    <p style="color:var(--muted); font-size:0.85rem;">Loading schedule...</p>
                 </div>
-
-                <div class="sched-card">
-                    <div class="sched-time"><div class="t">10:30</div><div class="d">AM</div></div>
-                    <div class="sched-sep"></div>
-                    <div class="pat-avatar" style="background:linear-gradient(135deg,#9b59b6,#8e44ad);">PK</div>
-                    <div class="sched-info">
-                        <div class="sched-name">Priya Kapoor</div>
-                        <div class="sched-reason">Hypertension consultation · 45 min</div>
-                    </div>
-                    <span class="sched-badge sb-new">New</span>
-                    <div class="action-btns">
-                        <button class="act-btn act-accept" onclick="alert('Starting consultation...')">Start</button>
-                        <button class="act-btn act-decline" onclick="alert('Appointment declined')">✕</button>
-                    </div>
-                </div>
-
-                <div class="sched-card">
-                    <div class="sched-time"><div class="t">12:00</div><div class="d">PM</div></div>
-                    <div class="sched-sep"></div>
-                    <div class="pat-avatar" style="background:linear-gradient(135deg,#e74c3c,#c0392b);">AM</div>
-                    <div class="sched-info">
-                        <div class="sched-name">Amit Mishra</div>
-                        <div class="sched-reason">Severe arrhythmia · 60 min</div>
-                    </div>
-                    <span class="sched-badge sb-urgent">Urgent</span>
-                    <div class="action-btns">
-                        <button class="act-btn act-accept" onclick="alert('Starting urgent consultation...')">Start</button>
-                    </div>
-                </div>
-
-                <div class="sched-card">
-                    <div class="sched-time"><div class="t">2:00</div><div class="d">PM</div></div>
-                    <div class="sched-sep"></div>
-                    <div class="pat-avatar" style="background:linear-gradient(135deg,#e67e22,#d35400);">SK</div>
-                    <div class="sched-info">
-                        <div class="sched-name">Sunita Khanna</div>
-                        <div class="sched-reason">Routine ECG review · 20 min</div>
-                    </div>
-                    <span class="sched-badge sb-followup">Follow-up</span>
-                    <div class="action-btns">
-                        <button class="act-btn act-accept" onclick="alert('Starting consultation...')">Start</button>
-                        <button class="act-btn act-decline" onclick="alert('Appointment declined')">✕</button>
-                    </div>
-                </div>
-
             </div>
 
             <br>
             <div class="section-hdr">
                 <span class="sec-title">Pending Appointment Requests</span>
-                <button class="see-all">See all →</button>
+                <button class="see-all" onclick="alert('Request management coming soon!')">See all →</button>
             </div>
-            <div class="sched-list">
-                <div class="sched-card">
-                    <div class="pat-avatar" style="background:linear-gradient(135deg,#2ecc71,#27ae60);">VR</div>
-                    <div class="sched-info">
-                        <div class="sched-name">Vishal Rao</div>
-                        <div class="sched-reason">Palpitations · Requested: 26 May, 11 AM</div>
-                    </div>
-                    <div class="action-btns">
-                        <button class="act-btn act-accept" onclick="alert('Request accepted!')">Accept</button>
-                        <button class="act-btn act-decline" onclick="alert('Request declined')">Decline</button>
-                    </div>
-                </div>
-                <div class="sched-card">
-                    <div class="pat-avatar" style="background:linear-gradient(135deg,#1abc9c,#16a085);">NJ</div>
-                    <div class="sched-info">
-                        <div class="sched-name">Neha Joshi</div>
-                        <div class="sched-reason">Breathlessness · Requested: 27 May, 3 PM</div>
-                    </div>
-                    <div class="action-btns">
-                        <button class="act-btn act-accept" onclick="alert('Request accepted!')">Accept</button>
-                        <button class="act-btn act-decline" onclick="alert('Request declined')">Decline</button>
-                    </div>
+            <div class="sched-list" id="pending-requests-list">
+                <div class="panel empty-state" style="padding: 2rem 1rem; border: none; background: transparent; text-align: left;">
+                    <p style="color:var(--muted); font-size:0.85rem;">Loading requests...</p>
                 </div>
             </div>
         </div>
@@ -351,7 +367,7 @@
             <div class="panel">
                 <div class="section-hdr">
                     <span class="sec-title">Recent Patients</span>
-                    <button class="see-all">All →</button>
+                    <button class="see-all" onclick="alert('Patient directory coming soon!')">All →</button>
                 </div>
                 <div class="pat-row">
                     <div class="pat-av" style="background:linear-gradient(135deg,#3498db,#2471a3);">RS</div>
@@ -376,6 +392,81 @@
             </div>
         </div>
     </div>
+    </div> <!-- end view-dashboard -->
+
+    <!-- Other Tabs -->
+    <div id="view-schedule" class="tab-pane">
+        <div class="section-hdr"><span class="sec-title">Full Schedule</span></div>
+        <div class="panel empty-state">
+            <i class="fas fa-calendar-alt"></i>
+            <h3>Calendar View</h3>
+            <p>Your full weekly and monthly calendar will appear here.</p>
+        </div>
+    </div>
+    <div id="view-patients" class="tab-pane">
+        <div class="section-hdr"><span class="sec-title">Patient Directory</span></div>
+        <div class="panel empty-state">
+            <i class="fas fa-users"></i>
+            <h3>All Patients</h3>
+            <p>Manage patient records, history, and notes from this directory.</p>
+        </div>
+    </div>
+    <div id="view-prescriptions" class="tab-pane">
+        <div class="section-hdr"><span class="sec-title">Write Prescription</span></div>
+        <div class="panel" style="margin-bottom: 2rem;">
+            <div style="display:flex; flex-direction:column; gap:1rem;">
+                <div>
+                    <label style="font-size:0.85rem; color:var(--muted); margin-bottom:5px; display:block;">Select Patient</label>
+                    <select id="rx-patient-select" style="width:100%; padding:0.8rem; background:var(--card); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); outline:none;">
+                        <option value="">Select a confirmed patient...</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:0.85rem; color:var(--muted); margin-bottom:5px; display:block;">Medicines & Notes</label>
+                    <textarea id="rx-notes" rows="4" placeholder="E.g. Paracetamol 500mg - 1 tab twice a day after meals" style="width:100%; padding:0.8rem; background:var(--card); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); outline:none; resize:vertical; font-family:'Poppins',sans-serif;"></textarea>
+                </div>
+                <button onclick="submitPrescription()" style="padding:0.8rem 1.5rem; background:var(--blue); color:#fff; border:none; border-radius:var(--radius-sm); font-weight:600; cursor:pointer; width:max-content; transition:0.3s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">Send Prescription</button>
+            </div>
+        </div>
+        
+        <div class="section-hdr"><span class="sec-title">Recent Prescriptions</span></div>
+        <div class="sched-list" id="doctor-prescriptions-list">
+            <p style="color:var(--muted); font-size:0.85rem;">Loading prescriptions...</p>
+        </div>
+    </div>
+    <div id="view-messages" class="tab-pane">
+        <div class="section-hdr"><span class="sec-title">Messages</span></div>
+        <div class="panel empty-state">
+            <i class="fas fa-comments"></i>
+            <h3>Doctor-Patient Chat</h3>
+            <p>Communicate with your patients safely and securely.</p>
+        </div>
+    </div>
+    <div id="view-earnings" class="tab-pane">
+        <div class="section-hdr"><span class="sec-title">Financial Reports</span></div>
+        <div class="panel empty-state">
+            <i class="fas fa-chart-line"></i>
+            <h3>Detailed Analytics</h3>
+            <p>View comprehensive earnings reports and consultation metrics.</p>
+        </div>
+    </div>
+    <div id="view-notifications" class="tab-pane">
+        <div class="section-hdr"><span class="sec-title">Notifications</span></div>
+        <div class="panel empty-state">
+            <i class="fas fa-bell-slash"></i>
+            <h3>No new alerts</h3>
+            <p>You have reviewed all your recent notifications.</p>
+        </div>
+    </div>
+    <div id="view-settings" class="tab-pane">
+        <div class="section-hdr"><span class="sec-title">Dashboard Settings</span></div>
+        <div class="panel empty-state">
+            <i class="fas fa-sliders"></i>
+            <h3>Clinic & Profile Info</h3>
+            <p>Update your availability, consultation fees, and professional details.</p>
+        </div>
+    </div>
+
 </main>
 
 <script>
@@ -412,6 +503,224 @@
             : '<div class="status-dot"></div> Available';
         el.style.background = isAvail ? 'rgba(230,126,34,0.12)' : 'rgba(46,204,113,0.12)';
         el.style.color = isAvail ? '#e67e22' : 'var(--green)';
+    }
+
+    function switchTab(tabId, el) {
+        document.querySelectorAll('.sb-link').forEach(link => link.classList.remove('active'));
+        if(el) el.classList.add('active');
+        document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+        const target = document.getElementById('view-' + tabId);
+        if(target) target.classList.add('active');
+    }
+
+    function getAppointments() {
+        return JSON.parse(localStorage.getItem('nexcare_appointments') || '[]');
+    }
+
+    function saveAppointments(appts) {
+        localStorage.setItem('nexcare_appointments', JSON.stringify(appts));
+    }
+
+    function updateAppointmentStatus(id, newStatus) {
+        const appts = getAppointments();
+        const appt = appts.find(a => a.id === id);
+        if (appt) {
+            appt.status = newStatus;
+            saveAppointments(appts);
+            loadDoctorAppointments();
+        }
+    }
+
+    function loadDoctorAppointments() {
+        if (!user || !user.email) return;
+        const appts = getAppointments().filter(a => a.doctorEmail === user.email);
+        
+        const scheduleList = document.getElementById('todays-schedule-list');
+        const requestsList = document.getElementById('pending-requests-list');
+        if (!scheduleList || !requestsList) return;
+
+        const confirmed = appts.filter(a => a.status === 'Confirmed');
+        const pending = appts.filter(a => a.status === 'Pending');
+
+        if (confirmed.length === 0) {
+            scheduleList.innerHTML = `
+                <div class="panel empty-state" style="padding: 2rem 1rem; border: none; background: transparent; text-align: left;">
+                    <i class="fas fa-calendar-times" style="font-size: 2rem;"></i>
+                    <h3 style="font-size: 1rem;">No appointments scheduled</h3>
+                    <p style="font-size: 0.8rem;">You have no confirmed appointments for today.</p>
+                </div>`;
+        } else {
+            let html = '';
+            confirmed.forEach(a => {
+                html += `
+                <div class="sched-card">
+                    <div class="sched-time"><div class="t" style="font-size:0.9rem;">Today</div></div>
+                    <div class="sched-sep"></div>
+                    <div class="pat-avatar" style="background:linear-gradient(135deg,#3498db,#2471a3);">${a.patientInitials}</div>
+                    <div class="sched-info">
+                        <div class="sched-name">${a.patientName}</div>
+                        <div class="sched-reason">Consultation</div>
+                    </div>
+                    <span class="sched-badge sb-followup">Confirmed</span>
+                    <div class="action-btns">
+                        <button class="act-btn act-accept" onclick="alert('Starting consultation...')">Start</button>
+                    </div>
+                </div>`;
+            });
+            scheduleList.innerHTML = html;
+        }
+
+        if (pending.length === 0) {
+            requestsList.innerHTML = `
+                <div class="panel empty-state" style="padding: 2rem 1rem; border: none; background: transparent; text-align: left;">
+                    <i class="fas fa-inbox" style="font-size: 2rem;"></i>
+                    <h3 style="font-size: 1rem;">No pending requests</h3>
+                    <p style="font-size: 0.8rem;">You're all caught up with appointment requests.</p>
+                </div>`;
+        } else {
+            let html = '';
+            pending.forEach(a => {
+                html += `
+                <div class="sched-card">
+                    <div class="pat-avatar" style="background:linear-gradient(135deg,#2ecc71,#27ae60);">${a.patientInitials}</div>
+                    <div class="sched-info">
+                        <div class="sched-name">${a.patientName}</div>
+                        <div class="sched-reason">Consultation Request · ${a.time}</div>
+                    </div>
+                    <div class="action-btns">
+                        <button class="act-btn act-accept" onclick="updateAppointmentStatus('${a.id}', 'Confirmed')">Accept</button>
+                        <button class="act-btn act-decline" onclick="updateAppointmentStatus('${a.id}', 'Declined')">Decline</button>
+                    </div>
+                </div>`;
+            });
+            requestsList.innerHTML = html;
+        }
+    }
+
+    function getPrescriptions() {
+        return JSON.parse(localStorage.getItem('nexcare_prescriptions') || '[]');
+    }
+
+    function savePrescriptions(rxs) {
+        localStorage.setItem('nexcare_prescriptions', JSON.stringify(rxs));
+    }
+
+    function populatePrescriptionForm() {
+        if(!user) return;
+        const appts = getAppointments().filter(a => a.doctorEmail === user.email && a.status === 'Confirmed');
+        const select = document.getElementById('rx-patient-select');
+        if(!select) return;
+        
+        const patients = {};
+        appts.forEach(a => {
+            patients[a.patientEmail] = a.patientName;
+        });
+
+        let html = '<option value="">Select a confirmed patient...</option>';
+        for (const [email, name] of Object.entries(patients)) {
+            html += `<option value="${email}">${name} (${email})</option>`;
+        }
+        select.innerHTML = html;
+    }
+
+    function submitPrescription() {
+        const select = document.getElementById('rx-patient-select');
+        const notes = document.getElementById('rx-notes');
+        const patientEmail = select.value;
+        const patientName = select.options[select.selectedIndex]?.text.split(' (')[0];
+        const text = notes.value.trim();
+
+        if(!patientEmail || !text) {
+            alert('Please select a patient and write some prescription notes.');
+            return;
+        }
+
+        const rxs = getPrescriptions();
+        rxs.push({
+            id: Date.now().toString(),
+            doctorEmail: user.email,
+            doctorName: user.firstName + ' ' + (user.lastName||''),
+            patientEmail: patientEmail,
+            patientName: patientName,
+            notes: text,
+            date: new Date().toLocaleDateString('en-IN')
+        });
+        savePrescriptions(rxs);
+        
+        notes.value = '';
+        select.value = '';
+        alert('Prescription sent successfully!');
+        loadDoctorPrescriptions();
+    }
+
+    function loadDoctorPrescriptions() {
+        if(!user) return;
+        const rxs = getPrescriptions().filter(r => r.doctorEmail === user.email);
+        const container = document.getElementById('doctor-prescriptions-list');
+        if(!container) return;
+
+        if(rxs.length === 0) {
+            container.innerHTML = `
+                <div class="panel empty-state" style="padding: 2rem 1rem; border: none; background: transparent; text-align: left;">
+                    <i class="fas fa-file-waveform" style="font-size: 2rem;"></i>
+                    <h3 style="font-size: 1rem;">No prescriptions written</h3>
+                    <p style="font-size: 0.8rem;">You haven't written any prescriptions yet.</p>
+                </div>`;
+            return;
+        }
+
+        let html = '';
+        rxs.reverse().forEach(rx => {
+            html += `
+            <div class="a4-prescription" style="margin-top:1rem;">
+                <button onclick="window.print()" style="position:absolute; top:2.5rem; right:3rem; padding:6px 12px; background:var(--blue); color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:0.8rem;" class="print-btn"><i class="fas fa-print"></i> Print</button>
+                <div class="a4-header">
+                    <div class="a4-doc-info">
+                        <h2>Dr. ${rx.doctorName}</h2>
+                        <p><strong>General Consultant</strong></p>
+                        <p>NexCare Health Institute</p>
+                        <p>123 Medical Boulevard, Care City, 40001</p>
+                        <p><i class="fas fa-envelope"></i> ${rx.doctorEmail} | <i class="fas fa-phone"></i> +91 98765 43210</p>
+                    </div>
+                    <div class="a4-clinic-logo">
+                        <div class="dot"></div>Nex<span>Care</span>
+                    </div>
+                </div>
+                
+                <div class="a4-meta">
+                    <div>
+                        <p>Patient Name: <strong>${rx.patientName}</strong></p>
+                        <p>Patient Email: <strong>${rx.patientEmail}</strong></p>
+                    </div>
+                    <div style="text-align: right;">
+                        <p>Date: <strong>${rx.date}</strong></p>
+                        <p>Prescription ID: <strong>#RX-${rx.id.substring(rx.id.length-6)}</strong></p>
+                    </div>
+                </div>
+
+                <div class="a4-rx">Rx</div>
+                <div class="a4-notes">${rx.notes}</div>
+
+                <div class="a4-footer">
+                    <div>
+                        <p><strong>NexCare Support:</strong> help@nexcare.com</p>
+                        <p>Validity: 1 Month from date of issue</p>
+                    </div>
+                    <div class="a4-sign">
+                        <div class="a4-sign-line"></div>
+                        <p><strong>Dr. ${rx.doctorName}</strong></p>
+                        <p style="font-size: 0.75rem;">Digitally Signed</p>
+                    </div>
+                </div>
+            </div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    if (user) {
+        loadDoctorAppointments();
+        populatePrescriptionForm();
+        loadDoctorPrescriptions();
     }
 </script>
 </body>

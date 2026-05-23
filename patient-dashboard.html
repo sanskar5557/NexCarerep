@@ -89,6 +89,16 @@
             justify-content:center;gap:8px;transition:var(--transition);
         }
         .btn-logout:hover { background:rgba(239,68,68,0.2); }
+        .btn-home {
+            width:100%;padding:0.65rem;margin-bottom:0.6rem;
+            background:rgba(52,152,219,0.1);color:var(--blue);
+            border:1px solid rgba(52,152,219,0.2);
+            border-radius:var(--radius-sm);
+            font-size:0.85rem;font-weight:600;cursor:pointer;display:flex;
+            align-items:center;justify-content:center;gap:8px;
+            transition:var(--transition);text-decoration:none;
+        }
+        .btn-home:hover { background:rgba(52,152,219,0.2);color:#5dade2; }
 
         /* Main */
         .main { margin-left:260px; flex:1; padding:2rem; min-height:100vh; }
@@ -220,6 +230,87 @@
             .sidebar { width:200px; }
             .main { margin-left:200px; }
         }
+
+        /* A4 Prescription Template */
+        .a4-prescription {
+            background: #ffffff;
+            color: #333333;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto 2rem auto;
+            padding: 2.5rem 3rem;
+            border-radius: 4px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        .a4-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid var(--blue);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .a4-doc-info h2 { color: var(--blue-dark); font-size: 1.5rem; font-weight: 700; margin-bottom: 0.2rem; }
+        .a4-doc-info p { font-size: 0.85rem; color: #555; line-height: 1.4; margin-bottom: 2px; }
+        .a4-clinic-logo {
+            font-size: 1.4rem; font-weight: 800; color: var(--text);
+            display:flex; align-items:center; gap: 6px;
+            color: #333;
+        }
+        .a4-clinic-logo .dot { width:12px;height:12px;background:var(--green);border-radius:50%; }
+        .a4-clinic-logo span { color: var(--blue); }
+        .a4-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 4px;
+            border: 1px solid #e9ecef;
+        }
+        .a4-meta p { margin-bottom: 0.3rem; color: #444; }
+        .a4-meta strong { color: #111; }
+        .a4-rx { font-size: 2.5rem; font-weight: bold; color: var(--blue); line-height: 1; margin-bottom: 1rem; font-family: serif; font-style: italic; }
+        .a4-notes {
+            min-height: 200px;
+            font-size: 0.95rem; line-height: 1.8; color: #222;
+            white-space: pre-wrap;
+            padding: 0.5rem;
+        }
+        .a4-footer {
+            margin-top: 3rem;
+            border-top: 1px solid #ddd;
+            padding-top: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            font-size: 0.85rem; color: #666;
+        }
+        .a4-sign { text-align: center; }
+        .a4-sign-line { width: 160px; border-bottom: 1px dashed #999; margin-bottom: 8px; height: 40px; }
+        
+        @media print {
+            body * { visibility: hidden; }
+            .a4-prescription, .a4-prescription * { visibility: visible; }
+            .a4-prescription { position: absolute; left: 0; top: 0; box-shadow: none; width: 100%; max-width: 100%; }
+            .sidebar, .topbar { display: none !important; }
+            .main { margin-left: 0 !important; padding: 0 !important; }
+        }
+
+
+        /* Tabs */
+        .tab-pane { display: none; animation: fadeInTab 0.3s ease; }
+        .tab-pane.active { display: block; }
+        @keyframes fadeInTab {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .empty-state { text-align: center; padding: 4rem 2rem; color: var(--muted); }
+        .empty-state i { font-size: 3rem; color: rgba(255,255,255,0.1); margin-bottom: 1rem; }
+        .empty-state h3 { color: var(--text); font-size: 1.2rem; margin-bottom: 0.5rem; }
     </style>
 </head>
 <body>
@@ -236,16 +327,19 @@
     </div>
     <nav class="sb-nav">
         <div class="sb-nav-label">Main</div>
-        <a class="sb-link active"><i class="fas fa-house"></i> Dashboard</a>
-        <a class="sb-link"><i class="fas fa-calendar-check"></i> My Appointments</a>
-        <a class="sb-link"><i class="fas fa-magnifying-glass"></i> Find Doctors</a>
-        <a class="sb-link"><i class="fas fa-file-medical"></i> Health Records</a>
+        <a class="sb-link active" onclick="switchTab('dashboard', this)"><i class="fas fa-house"></i> Dashboard</a>
+        <a class="sb-link" onclick="switchTab('appointments', this)"><i class="fas fa-calendar-check"></i> My Appointments</a>
+        <a class="sb-link" onclick="switchTab('doctors', this)"><i class="fas fa-magnifying-glass"></i> Find Doctors</a>
+        <a class="sb-link" onclick="switchTab('records', this)"><i class="fas fa-file-medical"></i> Health Records</a>
         <div class="sb-nav-label">More</div>
-        <a class="sb-link"><i class="fas fa-message"></i> Messages</a>
-        <a class="sb-link"><i class="fas fa-bell"></i> Notifications</a>
-        <a class="sb-link"><i class="fas fa-gear"></i> Settings</a>
+        <a class="sb-link" onclick="switchTab('messages', this)"><i class="fas fa-message"></i> Messages</a>
+        <a class="sb-link" onclick="switchTab('notifications', this)"><i class="fas fa-bell"></i> Notifications</a>
+        <a class="sb-link" onclick="switchTab('settings', this)"><i class="fas fa-gear"></i> Settings</a>
     </nav>
     <div class="sb-footer">
+        <a href="index.html" class="btn-home">
+            <i class="fas fa-globe"></i> Back to Website
+        </a>
         <button class="btn-logout" onclick="logoutUser()">
             <i class="fas fa-right-from-bracket"></i> Logout
         </button>
@@ -262,12 +356,14 @@
             <p id="greeting-date">Loading...</p>
         </div>
         <div class="topbar-actions">
-            <div class="icon-btn" title="Notifications"><i class="fas fa-bell"></i></div>
-            <div class="icon-btn" title="Messages"><i class="fas fa-message"></i></div>
+            <div class="icon-btn" title="Notifications" onclick="alert('No new notifications')"><i class="fas fa-bell"></i></div>
+            <div class="icon-btn" title="Messages" onclick="alert('Messages module coming soon!')"><i class="fas fa-message"></i></div>
         </div>
     </div>
 
-    <!-- Stats -->
+    <!-- Tabs Container -->
+    <div id="view-dashboard" class="tab-pane active">
+        <!-- Stats -->
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-icon blue"><i class="fas fa-calendar-check"></i></div>
@@ -290,7 +386,7 @@
     <!-- Search Doctors -->
     <div class="search-bar">
         <i class="fas fa-search"></i>
-        <input type="text" placeholder="Search for doctors, specializations...">
+        <input type="text" placeholder="Search for doctors, specializations..." onkeypress="if(event.key === 'Enter') alert('Search functionality coming soon!')">
     </div>
 
     <!-- Main grid -->
@@ -300,61 +396,19 @@
         <div>
             <div class="section-header">
                 <span class="section-title">Upcoming Appointments</span>
-                <button class="see-all">See all →</button>
+                <button class="see-all" onclick="alert('Appointments view coming soon!')">See all →</button>
             </div>
-            <div class="appt-list">
-                <div class="appt-card">
-                    <div class="appt-avatar">DC</div>
-                    <div class="appt-info">
-                        <div class="appt-name">Dr. Divya Chauhan</div>
-                        <div class="appt-spec">Cardiologist · Max Hospital</div>
-                        <div class="appt-time"><i class="fas fa-clock"></i> Tomorrow, 10:30 AM</div>
-                    </div>
-                    <span class="appt-badge badge-confirmed">Confirmed</span>
-                </div>
-                <div class="appt-card">
-                    <div class="appt-avatar">RK</div>
-                    <div class="appt-info">
-                        <div class="appt-name">Dr. Rohit Kumar</div>
-                        <div class="appt-spec">Dermatologist · Apollo</div>
-                        <div class="appt-time"><i class="fas fa-clock"></i> 26 May, 2:00 PM</div>
-                    </div>
-                    <span class="appt-badge badge-pending">Pending</span>
-                </div>
-                <div class="appt-card">
-                    <div class="appt-avatar">AS</div>
-                    <div class="appt-info">
-                        <div class="appt-name">Dr. Ananya Sharma</div>
-                        <div class="appt-spec">General Physician · Fortis</div>
-                        <div class="appt-time"><i class="fas fa-clock"></i> 30 May, 9:00 AM</div>
-                    </div>
-                    <span class="appt-badge badge-confirmed">Confirmed</span>
-                </div>
+            <div class="appt-list" id="upcoming-appointments-list">
+                <p style="color:var(--muted); font-size:0.85rem;">Loading appointments...</p>
             </div>
 
             <br>
             <div class="section-header">
                 <span class="section-title">Recommended Doctors</span>
             </div>
-            <div class="appt-list">
-                <div class="appt-card">
-                    <div class="appt-avatar" style="background:linear-gradient(135deg,#9b59b6,#8e44ad);">PG</div>
-                    <div class="appt-info">
-                        <div class="appt-name">Dr. Priya Gupta</div>
-                        <div class="appt-spec">Neurologist · AIIMS Delhi</div>
-                        <div class="appt-time"><i class="fas fa-star" style="color:#f1c40f;"></i> 4.9 · 200+ Reviews</div>
-                    </div>
-                    <button onclick="alert('Booking flow coming soon!')" style="padding:6px 14px;background:rgba(52,152,219,0.15);color:var(--blue);border:1px solid rgba(52,152,219,0.3);border-radius:8px;font-size:0.78rem;font-weight:600;cursor:pointer;">Book</button>
-                </div>
-                <div class="appt-card">
-                    <div class="appt-avatar" style="background:linear-gradient(135deg,#e67e22,#d35400);">MV</div>
-                    <div class="appt-info">
-                        <div class="appt-name">Dr. Manish Verma</div>
-                        <div class="appt-spec">Orthopaedic · Medanta</div>
-                        <div class="appt-time"><i class="fas fa-star" style="color:#f1c40f;"></i> 4.7 · 150+ Reviews</div>
-                    </div>
-                    <button onclick="alert('Booking flow coming soon!')" style="padding:6px 14px;background:rgba(52,152,219,0.15);color:var(--blue);border:1px solid rgba(52,152,219,0.3);border-radius:8px;font-size:0.78rem;font-weight:600;cursor:pointer;">Book</button>
-                </div>
+            <div class="appt-list" id="registered-doctors-list">
+                <!-- Registered doctors will be injected here via JS -->
+                <p style="color:var(--muted); font-size:0.85rem;">Loading doctors...</p>
             </div>
         </div>
 
@@ -364,12 +418,12 @@
             <div class="panel-card">
                 <div class="section-header"><span class="section-title">Quick Book</span></div>
                 <div class="quick-book-grid">
-                    <button class="qb-btn"><i class="fas fa-heart-pulse"></i>Cardiology</button>
-                    <button class="qb-btn"><i class="fas fa-brain"></i>Neurology</button>
-                    <button class="qb-btn"><i class="fas fa-bone"></i>Orthopaedic</button>
-                    <button class="qb-btn"><i class="fas fa-eye"></i>Ophthalmology</button>
-                    <button class="qb-btn"><i class="fas fa-tooth"></i>Dentist</button>
-                    <button class="qb-btn"><i class="fas fa-child"></i>Paediatric</button>
+                    <button class="qb-btn" onclick="alert('Cardiology booking flow coming soon!')"><i class="fas fa-heart-pulse"></i>Cardiology</button>
+                    <button class="qb-btn" onclick="alert('Neurology booking flow coming soon!')"><i class="fas fa-brain"></i>Neurology</button>
+                    <button class="qb-btn" onclick="alert('Orthopaedic booking flow coming soon!')"><i class="fas fa-bone"></i>Orthopaedic</button>
+                    <button class="qb-btn" onclick="alert('Ophthalmology booking flow coming soon!')"><i class="fas fa-eye"></i>Ophthalmology</button>
+                    <button class="qb-btn" onclick="alert('Dentist booking flow coming soon!')"><i class="fas fa-tooth"></i>Dentist</button>
+                    <button class="qb-btn" onclick="alert('Paediatric booking flow coming soon!')"><i class="fas fa-child"></i>Paediatric</button>
                 </div>
             </div>
 
@@ -407,6 +461,52 @@
             </div>
         </div>
 
+        </div>
+    </div>
+    
+    <!-- Other Tabs -->
+    <div id="view-appointments" class="tab-pane">
+        <div class="section-header"><span class="section-title">My Appointments</span></div>
+        <div class="appt-list" id="all-appointments-list">
+            <p style="color:var(--muted); font-size:0.85rem;">Loading appointments...</p>
+        </div>
+    </div>
+    <div id="view-doctors" class="tab-pane">
+        <div class="section-header"><span class="section-title">Find Doctors</span></div>
+        <div class="appt-list" id="all-doctors-list" style="margin-top: 1rem;">
+            <!-- Registered doctors will be injected here via JS -->
+            <p style="color:var(--muted); font-size:0.85rem;">Loading doctors...</p>
+        </div>
+    </div>
+    <div id="view-records" class="tab-pane">
+        <div class="section-header"><span class="section-title">My Prescriptions</span></div>
+        <div class="appt-list" id="patient-prescriptions-list">
+            <p style="color:var(--muted); font-size:0.85rem;">Loading prescriptions...</p>
+        </div>
+    </div>
+    <div id="view-messages" class="tab-pane">
+        <div class="section-header"><span class="section-title">Messages</span></div>
+        <div class="panel-card empty-state">
+            <i class="fas fa-comments"></i>
+            <h3>No messages yet</h3>
+            <p>Start a conversation with your doctors or support team.</p>
+        </div>
+    </div>
+    <div id="view-notifications" class="tab-pane">
+        <div class="section-header"><span class="section-title">Notifications</span></div>
+        <div class="panel-card empty-state">
+            <i class="fas fa-bell-slash"></i>
+            <h3>You're all caught up!</h3>
+            <p>You have no new notifications.</p>
+        </div>
+    </div>
+    <div id="view-settings" class="tab-pane">
+        <div class="section-header"><span class="section-title">Account Settings</span></div>
+        <div class="panel-card empty-state">
+            <i class="fas fa-sliders"></i>
+            <h3>Profile Preferences</h3>
+            <p>Update your personal information, security settings, and notification preferences.</p>
+        </div>
     </div>
 </main>
 
@@ -435,6 +535,187 @@
         localStorage.removeItem('nexcare_logged_in');
         localStorage.removeItem('nexcare_user');
         window.location.href = 'auth.html';
+    }
+
+    function switchTab(tabId, el) {
+        document.querySelectorAll('.sb-link').forEach(link => link.classList.remove('active'));
+        if(el) el.classList.add('active');
+        document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+        const target = document.getElementById('view-' + tabId);
+        if(target) target.classList.add('active');
+    }
+    function getAppointments() {
+        return JSON.parse(localStorage.getItem('nexcare_appointments') || '[]');
+    }
+    function saveAppointments(appts) {
+        localStorage.setItem('nexcare_appointments', JSON.stringify(appts));
+    }
+
+    function bookAppointment(docEmail, docName) {
+        const appts = getAppointments();
+        const newAppt = {
+            id: Date.now().toString(),
+            doctorEmail: docEmail,
+            doctorName: docName,
+            patientEmail: user.email,
+            patientName: user.firstName + ' ' + (user.lastName || ''),
+            patientInitials: ((user.firstName?.[0]||'')+(user.lastName?.[0]||'')).toUpperCase() || 'P',
+            status: 'Pending',
+            time: 'Requested just now'
+        };
+        appts.push(newAppt);
+        saveAppointments(appts);
+        alert('Appointment requested successfully!');
+        loadPatientAppointments();
+    }
+
+    function loadPatientAppointments() {
+        const appts = getAppointments().filter(a => a.patientEmail === user.email);
+        const container1 = document.getElementById('upcoming-appointments-list');
+        const container2 = document.getElementById('all-appointments-list');
+        if (!container1 || !container2) return;
+
+        if (appts.length === 0) {
+            const emptyHtml = `
+                <div class="panel-card empty-state" style="padding: 2rem 1rem; border: none; background: transparent;">
+                    <i class="fas fa-calendar-times" style="font-size: 2rem;"></i>
+                    <h3 style="font-size: 1rem;">No upcoming appointments</h3>
+                    <p style="font-size: 0.8rem;">You don't have any appointments scheduled yet.</p>
+                </div>`;
+            container1.innerHTML = emptyHtml;
+            container2.innerHTML = emptyHtml;
+            return;
+        }
+
+        let html = '';
+        appts.forEach(a => {
+            const badgeClass = a.status === 'Confirmed' ? 'badge-confirmed' : (a.status === 'Declined' ? 'badge-cancelled' : 'badge-pending');
+            const docInitials = a.doctorName.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+            html += `
+            <div class="appt-card">
+                <div class="appt-avatar" style="background:linear-gradient(135deg,var(--purple),#8e44ad);">${docInitials}</div>
+                <div class="appt-info">
+                    <div class="appt-name">Dr. ${a.doctorName}</div>
+                    <div class="appt-time"><i class="fas fa-clock"></i> ${a.time}</div>
+                </div>
+                <span class="appt-badge ${badgeClass}">${a.status}</span>
+            </div>`;
+        });
+        
+        container1.innerHTML = html;
+        container2.innerHTML = html;
+    }
+
+    function loadRegisteredDoctors() {
+        const container = document.getElementById('registered-doctors-list');
+        if (!container) return;
+
+        const registryStr = localStorage.getItem('nexcare_registry');
+        const registry = registryStr ? JSON.parse(registryStr) : {};
+        
+        let html = '';
+        let doctorCount = 0;
+
+        for (const email in registry) {
+            const u = registry[email];
+            if (u.role && u.role.toLowerCase() === 'doctor') {
+                doctorCount++;
+                const fname = u.firstName || 'Doctor';
+                const lname = u.lastName || '';
+                const initials = ((fname[0]||'') + (lname[0]||'')).toUpperCase() || 'D';
+                const joinDate = u.joined || 'Recently';
+
+                html += `
+                <div class="appt-card">
+                    <div class="appt-avatar" style="background:linear-gradient(135deg,var(--blue),var(--blue-dark));">${initials}</div>
+                    <div class="appt-info">
+                        <div class="appt-name">Dr. ${fname} ${lname}</div>
+                        <div class="appt-spec">Consultant · Joined ${joinDate}</div>
+                        <div class="appt-time"><i class="fas fa-envelope" style="color:var(--muted);"></i> ${email}</div>
+                    </div>
+                    <button onclick="bookAppointment('${email}', '${fname} ${lname}')" style="padding:6px 14px;background:rgba(52,152,219,0.15);color:var(--blue);border:1px solid rgba(52,152,219,0.3);border-radius:8px;font-size:0.78rem;font-weight:600;cursor:pointer;">Book</button>
+                </div>`;
+            }
+        }
+
+        if (doctorCount === 0) {
+            html = `<p style="color:var(--muted); font-size:0.85rem; padding: 1rem 0;">No registered doctors found in the system yet.</p>`;
+        }
+        
+        container.innerHTML = html;
+        const allDocsContainer = document.getElementById('all-doctors-list');
+        if(allDocsContainer) allDocsContainer.innerHTML = html;
+    }
+
+    function loadPatientPrescriptions() {
+        const rxsStr = localStorage.getItem('nexcare_prescriptions');
+        const rxs = rxsStr ? JSON.parse(rxsStr).filter(r => r.patientEmail === user.email) : [];
+        const container = document.getElementById('patient-prescriptions-list');
+        if (!container) return;
+
+        if (rxs.length === 0) {
+            container.innerHTML = `
+                <div class="panel-card empty-state" style="padding: 2rem 1rem; border: none; background: transparent;">
+                    <i class="fas fa-file-prescription" style="font-size: 2rem;"></i>
+                    <h3 style="font-size: 1rem;">No prescriptions yet</h3>
+                    <p style="font-size: 0.8rem;">Your doctors have not sent any prescriptions.</p>
+                </div>`;
+            return;
+        }
+
+        let html = '';
+        rxs.reverse().forEach(rx => {
+            html += `
+            <div class="a4-prescription">
+                <button onclick="window.print()" style="position:absolute; top:2.5rem; right:3rem; padding:6px 12px; background:var(--blue); color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:0.8rem;" class="print-btn"><i class="fas fa-print"></i> Print</button>
+                <div class="a4-header">
+                    <div class="a4-doc-info">
+                        <h2>Dr. ${rx.doctorName}</h2>
+                        <p><strong>General Consultant</strong></p>
+                        <p>NexCare Health Institute</p>
+                        <p>123 Medical Boulevard, Care City, 40001</p>
+                        <p><i class="fas fa-envelope"></i> ${rx.doctorEmail} | <i class="fas fa-phone"></i> +91 98765 43210</p>
+                    </div>
+                    <div class="a4-clinic-logo">
+                        <div class="dot"></div>Nex<span>Care</span>
+                    </div>
+                </div>
+                
+                <div class="a4-meta">
+                    <div>
+                        <p>Patient Name: <strong>${rx.patientName}</strong></p>
+                        <p>Patient Email: <strong>${rx.patientEmail}</strong></p>
+                    </div>
+                    <div style="text-align: right;">
+                        <p>Date: <strong>${rx.date}</strong></p>
+                        <p>Prescription ID: <strong>#RX-${rx.id.substring(rx.id.length-6)}</strong></p>
+                    </div>
+                </div>
+
+                <div class="a4-rx">Rx</div>
+                <div class="a4-notes">${rx.notes}</div>
+
+                <div class="a4-footer">
+                    <div>
+                        <p><strong>NexCare Support:</strong> help@nexcare.com</p>
+                        <p>Validity: 1 Month from date of issue</p>
+                    </div>
+                    <div class="a4-sign">
+                        <div class="a4-sign-line"></div>
+                        <p><strong>Dr. ${rx.doctorName}</strong></p>
+                        <p style="font-size: 0.75rem;">Digitally Signed</p>
+                    </div>
+                </div>
+            </div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    // Call it when the page loads
+    if (user) {
+        loadRegisteredDoctors();
+        loadPatientAppointments();
+        loadPatientPrescriptions();
     }
 </script>
 </body>

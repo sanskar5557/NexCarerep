@@ -759,7 +759,8 @@
                 localStorage.setItem('nexcare_logged_in', 'true');
                 btn.innerHTML = '<i class="fas fa-check"></i> Success! Redirecting...';
                 btn.style.background = 'linear-gradient(135deg,#2ecc71,#27ae60)';
-                setTimeout(() => { window.location.href = 'index.html'; }, 900);
+                const dest = (user.role||'').toLowerCase() === 'doctor' ? 'doctor-dashboard.html' : 'patient-dashboard.html';
+                setTimeout(() => { window.location.href = dest; }, 900);
             }, 1200);
         }
 
@@ -811,7 +812,8 @@
                 btn.innerHTML = '<i class="fas fa-check"></i> Account Created!';
                 btn.style.background = 'linear-gradient(135deg,#3498db,#2471a3)';
                 showMsg('signup-msg', 'success', 'Account created! Redirecting...');
-                setTimeout(() => { window.location.href = 'index.html'; }, 900);
+                const dest = userData.role.toLowerCase() === 'doctor' ? 'doctor-dashboard.html' : 'patient-dashboard.html';
+                setTimeout(() => { window.location.href = dest; }, 900);
             }, 1400);
         }
 
