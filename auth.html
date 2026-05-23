@@ -770,73 +770,107 @@
             e.preventDefault();
             hideMsg('signup-msg');
             const btn      = e.target.querySelector('.btn-submit');
-            const email    = document.getElementById('signup-email').value.trim().toLowerCase();
-            const password = document.getElementById('signup-password').value;
+            
+            try {
+                const email    = document.getElementById('signup-email').value.trim().toLowerCase();
+                const password = document.getElementById('signup-password').value;
 
-            if (password.length < 6) {
-                showMsg('signup-msg', 'error', 'Password must be at least 6 characters.');
-                return;
-            }
+                if (password.length < 6) {
+                    showMsg('signup-msg', 'error', 'Password must be at least 6 characters.');
+                    return;
+                }
 
-            const roleRaw = document.querySelector('input[name="role"]:checked').value;
-            const role = roleRaw.charAt(0).toUpperCase() + roleRaw.slice(1);
-            const firstName = document.getElementById('signup-fname').value.trim();
-            const lastName = document.getElementById('signup-lname').value.trim();
-            const phone = document.getElementById('signup-phone').value.trim();
+                const roleRaw = document.querySelector('input[name="role"]:checked').value;
+                const role = roleRaw.charAt(0).toUpperCase() + roleRaw.slice(1);
+                const firstName = document.getElementById('signup-fname').value.trim();
+                const lastName = document.getElementById('signup-lname').value.trim();
+                const phone = document.getElementById('signup-phone').value.trim();
 
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
-            btn.disabled  = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+                btn.disabled  = true;
 
-            const { data, error } = await supabase.auth.signUp({
-                email,
-                password
-            });
-
-            if (error) {
-                showMsg('signup-msg', 'error', error.message);
-                btn.innerHTML = '<i class="fas fa-user-plus"></i> Create My Account';
-                btn.disabled = false;
-                return;
-            }
-
-            // Insert into profiles
-            const { error: profileError } = await supabase
-                .from('profiles')
-                .insert([
-                    {
-                        id: data.user.id,
-                        first_name: firstName,
-                        last_name: lastName,
-                        email: email,
-                        phone: phone,
-                        role: role,
-                        joined: new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})
+                const { data, error } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: {
+                            first_name: firstName,
+                            last_name: lastName,
+                            role: role
+                        }
                     }
-                ]);
+                });
 
-            if (profileError) {
-                showMsg('signup-msg', 'error', 'Error creating profile: ' + profileError.message);
+                if (error) {
+                    showMsg('signup-msg', 'error', error.message);
+                    btn.innerHTML = '<i class="fas fa-user-plus"></i> Create My Account';
+                    btn.disabled = false;
+                    return;
+                }
+
+                if (!data || !data.user) {
+                    showMsg('signup-msg', 'error', 'Account already exists or email confirmation required. Please check your email or try logging in.');
+                    btn.innerHTML = '<i class="fas fa-user-plus"></i> Create My Account';
+                    btn.disabled = false;
+                    return;
+                }
+
+                // If email confirmations are enabled, the user isn't logged in yet, so RLS might block this insert.
+                // We'll try to insert, but if it fails with RLS, we'll just tell them to check their email.
+                const { error: profileError } = await supabase
+                    .from('profiles')
+                    .insert([
+                        {
+                            id: data.user.id,
+                            first_name: firstName,
+                            last_name: lastName,
+                            email: email,
+                            phone: phone,
+                            role: role,
+                            joined: new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})
+                        }
+                    ]);
+
+                if (profileError) {
+                    // Check if it's an RLS error (which happens if email confirmation is turned on and they aren't logged in)
+                    if (profileError.code === '42501' || !data.session) {
+                        showMsg('signup-msg', 'success', 'Account created! Please check your email to confirm your account before logging in.');
+                        btn.innerHTML = '<i class="fas fa-check"></i> Check Email';
+                        return;
+                    }
+                    showMsg('signup-msg', 'error', 'Error creating profile: ' + profileError.message);
+                    btn.innerHTML = '<i class="fas fa-user-plus"></i> Create My Account';
+                    btn.disabled = false;
+                    return;
+                }
+
+                if (!data.session) {
+                    showMsg('signup-msg', 'success', 'Account created! Please check your email to confirm your account.');
+                    btn.innerHTML = '<i class="fas fa-check"></i> Check Email';
+                    return;
+                }
+
+                const sessionUser = {
+                    id: data.user.id,
+                    email: email,
+                    firstName: firstName,
+                    lastName: lastName,
+                    phone: phone,
+                    role: role
+                };
+                localStorage.setItem('nexcare_user', JSON.stringify(sessionUser));
+                localStorage.setItem('nexcare_logged_in', 'true');
+
+                btn.innerHTML = '<i class="fas fa-check"></i> Account Created!';
+                btn.style.background = 'linear-gradient(135deg,#3498db,#2471a3)';
+                showMsg('signup-msg', 'success', 'Account created! Redirecting...');
+                const dest = role.toLowerCase() === 'doctor' ? 'doctor-dashboard.html' : 'patient-dashboard.html';
+                setTimeout(() => { window.location.href = dest; }, 900);
+            } catch (err) {
+                showMsg('signup-msg', 'error', 'An unexpected error occurred: ' + err.message);
                 btn.innerHTML = '<i class="fas fa-user-plus"></i> Create My Account';
                 btn.disabled = false;
-                return;
             }
-
-            const sessionUser = {
-                id: data.user.id,
-                email: email,
-                firstName: firstName,
-                lastName: lastName,
-                phone: phone,
-                role: role
-            };
-            localStorage.setItem('nexcare_user', JSON.stringify(sessionUser));
-            localStorage.setItem('nexcare_logged_in', 'true');
-
-            btn.innerHTML = '<i class="fas fa-check"></i> Account Created!';
-            btn.style.background = 'linear-gradient(135deg,#3498db,#2471a3)';
-            showMsg('signup-msg', 'success', 'Account created! Redirecting...');
-            const dest = role.toLowerCase() === 'doctor' ? 'doctor-dashboard.html' : 'patient-dashboard.html';
-            setTimeout(() => { window.location.href = dest; }, 900);
         }
 
         // Social auth placeholder
