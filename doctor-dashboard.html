@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexCare | Doctor Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --blue:#3498DB; --blue-light:rgba(52,152,219,0.12);
+            --green:#2ECC71; --green-light:rgba(46,204,113,0.12);
+            --purple:#9b59b6; --orange:#e67e22;
+            --dark:#0F172A; --card:#1E293B; --card2:#243447;
+            --border:rgba(255,255,255,0.08); --text:#F1F5F9; --muted:#94A3B8;
+            --radius:16px; --radius-sm:10px;
+            --tr:all 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+        body{background:var(--dark);color:var(--text);min-height:100vh;display:flex;}
+
+        /* ── Sidebar ── */
+        .sidebar{width:260px;flex-shrink:0;background:var(--card);border-right:1px solid var(--border);
+            display:flex;flex-direction:column;padding:1.5rem 0;position:fixed;height:100vh;overflow-y:auto;}
+        .sb-logo{display:flex;align-items:center;gap:8px;padding:0 1.5rem 1.5rem;
+            font-size:1.4rem;font-weight:800;border-bottom:1px solid var(--border);}
+        .sb-logo-dot{width:10px;height:10px;background:var(--blue);border-radius:50%;}
+        .sb-logo span{color:var(--green);}
+
+        .sb-user{padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);}
+        .sb-avatar{width:52px;height:52px;border-radius:50%;
+            background:linear-gradient(135deg,var(--blue),#2471a3);
+            display:flex;align-items:center;justify-content:center;
+            font-weight:800;font-size:1.1rem;margin-bottom:0.6rem;}
+        .sb-name{font-weight:700;font-size:0.95rem;}
+        .sb-badge{display:inline-flex;align-items:center;gap:4px;
+            background:rgba(52,152,219,0.15);color:var(--blue);
+            border:1px solid rgba(52,152,219,0.3);
+            font-size:0.7rem;font-weight:600;padding:2px 8px;border-radius:20px;margin-top:3px;}
+
+        .sb-nav{padding:1rem 0;flex:1;}
+        .sb-label{font-size:0.65rem;font-weight:700;letter-spacing:0.1em;color:var(--muted);
+            text-transform:uppercase;padding:0.6rem 1.5rem 0.3rem;}
+        .sb-link{display:flex;align-items:center;gap:12px;padding:0.7rem 1.5rem;
+            color:var(--muted);font-size:0.88rem;font-weight:500;cursor:pointer;
+            transition:var(--tr);border-left:3px solid transparent;text-decoration:none;}
+        .sb-link:hover{color:var(--text);background:rgba(255,255,255,0.04);}
+        .sb-link.active{color:var(--blue);background:var(--blue-light);border-left-color:var(--blue);}
+        .sb-link i{width:18px;text-align:center;}
+        .sb-badge-count{margin-left:auto;background:var(--blue);color:#fff;
+            font-size:0.65rem;font-weight:700;padding:1px 7px;border-radius:20px;}
+
+        .sb-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);}
+        .btn-logout{width:100%;padding:0.65rem;background:rgba(239,68,68,0.1);color:#f87171;
+            border:1px solid rgba(239,68,68,0.2);border-radius:var(--radius-sm);
+            font-size:0.85rem;font-weight:600;cursor:pointer;display:flex;
+            align-items:center;justify-content:center;gap:8px;transition:var(--tr);}
+        .btn-logout:hover{background:rgba(239,68,68,0.2);}
+
+        /* ── Main ── */
+        .main{margin-left:260px;flex:1;padding:2rem;min-height:100vh;}
+
+        .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;}
+        .topbar h2{font-size:1.5rem;font-weight:800;}
+        .topbar p{color:var(--muted);font-size:0.88rem;margin-top:2px;}
+        .topbar-right{display:flex;gap:0.8rem;align-items:center;}
+        .icon-btn{width:40px;height:40px;border-radius:var(--radius-sm);background:var(--card);
+            border:1px solid var(--border);color:var(--muted);display:flex;
+            align-items:center;justify-content:center;cursor:pointer;transition:var(--tr);font-size:0.9rem;}
+        .icon-btn:hover{color:var(--text);border-color:rgba(255,255,255,0.2);}
+
+        /* Status toggle */
+        .status-pill{display:flex;align-items:center;gap:8px;
+            padding:0.4rem 1rem;border-radius:20px;font-size:0.82rem;font-weight:600;
+            background:var(--green-light);color:var(--green);
+            border:1px solid rgba(46,204,113,0.3);cursor:pointer;}
+        .status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+        @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+
+        /* Stats */
+        .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;margin-bottom:2rem;}
+        .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+            padding:1.3rem;display:flex;align-items:center;gap:1rem;transition:var(--tr);}
+        .stat-card:hover{border-color:rgba(255,255,255,0.15);transform:translateY(-2px);}
+        .stat-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;
+            justify-content:center;font-size:1.2rem;flex-shrink:0;}
+        .si-blue{background:var(--blue-light);color:var(--blue);}
+        .si-green{background:var(--green-light);color:var(--green);}
+        .si-purple{background:rgba(155,89,182,0.15);color:var(--purple);}
+        .si-orange{background:rgba(230,126,34,0.15);color:var(--orange);}
+        .stat-val{font-size:1.6rem;font-weight:800;line-height:1;}
+        .stat-label{color:var(--muted);font-size:0.78rem;margin-top:2px;}
+
+        /* Main grid */
+        .dash-grid{display:grid;grid-template-columns:1fr 300px;gap:1.5rem;}
+
+        .section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+        .sec-title{font-size:1rem;font-weight:700;}
+        .see-all{color:var(--blue);font-size:0.82rem;font-weight:600;background:none;border:none;cursor:pointer;}
+
+        /* Today's schedule */
+        .sched-list{display:flex;flex-direction:column;gap:0.8rem;}
+        .sched-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);
+            padding:1rem 1.2rem;display:flex;align-items:center;gap:1rem;transition:var(--tr);}
+        .sched-card:hover{border-color:rgba(255,255,255,0.15);}
+        .sched-time{min-width:70px;text-align:center;}
+        .sched-time .t{font-size:0.9rem;font-weight:700;color:var(--blue);}
+        .sched-time .d{font-size:0.7rem;color:var(--muted);}
+        .sched-sep{width:1px;height:44px;background:var(--border);}
+        .pat-avatar{width:40px;height:40px;border-radius:50%;flex-shrink:0;
+            display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;}
+        .sched-info{flex:1;}
+        .sched-name{font-weight:600;font-size:0.9rem;}
+        .sched-reason{color:var(--muted);font-size:0.78rem;margin-top:2px;}
+        .sched-badge{padding:4px 10px;border-radius:20px;font-size:0.72rem;font-weight:600;flex-shrink:0;}
+        .sb-new{background:rgba(52,152,219,0.15);color:var(--blue);}
+        .sb-followup{background:rgba(46,204,113,0.12);color:var(--green);}
+        .sb-urgent{background:rgba(239,68,68,0.12);color:#f87171;}
+
+        .action-btns{display:flex;gap:6px;}
+        .act-btn{padding:5px 10px;border-radius:6px;font-size:0.75rem;font-weight:600;
+            cursor:pointer;border:none;transition:var(--tr);font-family:'Poppins',sans-serif;}
+        .act-accept{background:var(--green-light);color:var(--green);}
+        .act-accept:hover{background:var(--green);color:#fff;}
+        .act-decline{background:rgba(239,68,68,0.1);color:#f87171;}
+        .act-decline:hover{background:#ef4444;color:#fff;}
+
+        /* Side panels */
+        .panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+            padding:1.2rem;margin-bottom:1.2rem;}
+
+        /* Earnings chart placeholder */
+        .earn-row{display:flex;align-items:flex-end;justify-content:space-between;
+            height:90px;gap:6px;padding:0 4px;}
+        .earn-bar-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;}
+        .earn-bar{width:100%;border-radius:4px 4px 0 0;background:rgba(52,152,219,0.2);transition:var(--tr);}
+        .earn-bar.today{background:linear-gradient(to top,var(--blue),#5dade2);}
+        .earn-bar-wrap:hover .earn-bar{background:rgba(52,152,219,0.4);}
+        .earn-day{font-size:0.62rem;color:var(--muted);}
+        .earn-total{font-size:1.4rem;font-weight:800;color:var(--green);margin-bottom:2px;}
+        .earn-sub{font-size:0.75rem;color:var(--muted);}
+
+        /* Patient list */
+        .pat-row{display:flex;align-items:center;gap:10px;padding:0.6rem 0;
+            border-bottom:1px solid var(--border);}
+        .pat-row:last-child{border-bottom:none;}
+        .pat-av{width:36px;height:36px;border-radius:50%;flex-shrink:0;
+            display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.78rem;}
+        .pat-info{flex:1;}
+        .pat-nm{font-size:0.85rem;font-weight:600;}
+        .pat-ag{font-size:0.72rem;color:var(--muted);}
+        .pat-status{font-size:0.72rem;font-weight:600;padding:2px 8px;border-radius:20px;}
+        .ps-stable{background:rgba(46,204,113,0.12);color:var(--green);}
+        .ps-review{background:rgba(230,126,34,0.12);color:var(--orange);}
+        .ps-critical{background:rgba(239,68,68,0.12);color:#f87171;}
+
+        @media(max-width:1100px){.stats-grid{grid-template-columns:repeat(2,1fr);}
+            .dash-grid{grid-template-columns:1fr;}}
+        @media(max-width:768px){.sidebar{width:200px;}.main{margin-left:200px;}}
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+    <div class="sb-logo">
+        <div class="sb-logo-dot"></div>Nex<span>Care</span>
+    </div>
+    <div class="sb-user">
+        <div class="sb-avatar" id="sb-avatar">D</div>
+        <div class="sb-name" id="sb-name">Doctor</div>
+        <div class="sb-badge"><i class="fas fa-user-doctor"></i> Doctor</div>
+    </div>
+    <nav class="sb-nav">
+        <div class="sb-label">Main</div>
+        <a class="sb-link active"><i class="fas fa-house"></i> Dashboard</a>
+        <a class="sb-link"><i class="fas fa-calendar-days"></i> Schedule<span class="sb-badge-count">3</span></a>
+        <a class="sb-link"><i class="fas fa-users"></i> My Patients</a>
+        <a class="sb-link"><i class="fas fa-file-waveform"></i> Prescriptions</a>
+        <div class="sb-label">Tools</div>
+        <a class="sb-link"><i class="fas fa-message"></i> Messages<span class="sb-badge-count">2</span></a>
+        <a class="sb-link"><i class="fas fa-indian-rupee-sign"></i> Earnings</a>
+        <a class="sb-link"><i class="fas fa-bell"></i> Notifications</a>
+        <a class="sb-link"><i class="fas fa-gear"></i> Settings</a>
+    </nav>
+    <div class="sb-footer">
+        <button class="btn-logout" onclick="logoutUser()">
+            <i class="fas fa-right-from-bracket"></i> Logout
+        </button>
+    </div>
+</aside>
+
+<!-- Main -->
+<main class="main">
+
+    <div class="topbar">
+        <div>
+            <h2 id="greeting-name">Good morning, Doctor 👨‍⚕️</h2>
+            <p id="greeting-date">Loading...</p>
+        </div>
+        <div class="topbar-right">
+            <div class="status-pill" onclick="toggleStatus(this)">
+                <div class="status-dot"></div> Available
+            </div>
+            <div class="icon-btn"><i class="fas fa-bell"></i></div>
+            <div class="icon-btn"><i class="fas fa-message"></i></div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon si-blue"><i class="fas fa-calendar-check"></i></div>
+            <div><div class="stat-val">8</div><div class="stat-label">Today's Appointments</div></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon si-green"><i class="fas fa-users"></i></div>
+            <div><div class="stat-val">124</div><div class="stat-label">Total Patients</div></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon si-purple"><i class="fas fa-star"></i></div>
+            <div><div class="stat-val">4.9</div><div class="stat-label">Avg Rating</div></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon si-orange"><i class="fas fa-indian-rupee-sign"></i></div>
+            <div><div class="stat-val">₹38K</div><div class="stat-label">This Month</div></div>
+        </div>
+    </div>
+
+    <div class="dash-grid">
+        <!-- Left -->
+        <div>
+            <div class="section-hdr">
+                <span class="sec-title">Today's Schedule</span>
+                <button class="see-all">Manage →</button>
+            </div>
+            <div class="sched-list">
+
+                <div class="sched-card">
+                    <div class="sched-time"><div class="t">9:00</div><div class="d">AM</div></div>
+                    <div class="sched-sep"></div>
+                    <div class="pat-avatar" style="background:linear-gradient(135deg,#3498db,#2471a3);">RS</div>
+                    <div class="sched-info">
+                        <div class="sched-name">Rahul Sharma</div>
+                        <div class="sched-reason">Chest pain follow-up · 30 min</div>
+                    </div>
+                    <span class="sched-badge sb-followup">Follow-up</span>
+                    <div class="action-btns">
+                        <button class="act-btn act-accept" onclick="alert('Starting consultation...')">Start</button>
+                    </div>
+                </div>
+
+                <div class="sched-card">
+                    <div class="sched-time"><div class="t">10:30</div><div class="d">AM</div></div>
+                    <div class="sched-sep"></div>
+                    <div class="pat-avatar" style="background:linear-gradient(135deg,#9b59b6,#8e44ad);">PK</div>
+                    <div class="sched-info">
+                        <div class="sched-name">Priya Kapoor</div>
+                        <div class="sched-reason">Hypertension consultation · 45 min</div>
+                    </div>
+                    <span class="sched-badge sb-new">New</span>
+                    <div class="action-btns">
+                        <button class="act-btn act-accept" onclick="alert('Starting consultation...')">Start</button>
+                        <button class="act-btn act-decline" onclick="alert('Appointment declined')">✕</button>
+                    </div>
+                </div>
+
+                <div class="sched-card">
+                    <div class="sched-time"><div class="t">12:00</div><div class="d">PM</div></div>
+                    <div class="sched-sep"></div>
+                    <div class="pat-avatar" style="background:linear-gradient(135deg,#e74c3c,#c0392b);">AM</div>
+                    <div class="sched-info">
+                        <div class="sched-name">Amit Mishra</div>
+                        <div class="sched-reason">Severe arrhythmia · 60 min</div>
+                    </div>
+                    <span class="sched-badge sb-urgent">Urgent</span>
+                    <div class="action-btns">
+                        <button class="act-btn act-accept" onclick="alert('Starting urgent consultation...')">Start</button>
+                    </div>
+                </div>
+
+                <div class="sched-card">
+                    <div class="sched-time"><div class="t">2:00</div><div class="d">PM</div></div>
+                    <div class="sched-sep"></div>
+                    <div class="pat-avatar" style="background:linear-gradient(135deg,#e67e22,#d35400);">SK</div>
+                    <div class="sched-info">
+                        <div class="sched-name">Sunita Khanna</div>
+                        <div class="sched-reason">Routine ECG review · 20 min</div>
+                    </div>
+                    <span class="sched-badge sb-followup">Follow-up</span>
+                    <div class="action-btns">
+                        <button class="act-btn act-accept" onclick="alert('Starting consultation...')">Start</button>
+                        <button class="act-btn act-decline" onclick="alert('Appointment declined')">✕</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <br>
+            <div class="section-hdr">
+                <span class="sec-title">Pending Appointment Requests</span>
+                <button class="see-all">See all →</button>
+            </div>
+            <div class="sched-list">
+                <div class="sched-card">
+                    <div class="pat-avatar" style="background:linear-gradient(135deg,#2ecc71,#27ae60);">VR</div>
+                    <div class="sched-info">
+                        <div class="sched-name">Vishal Rao</div>
+                        <div class="sched-reason">Palpitations · Requested: 26 May, 11 AM</div>
+                    </div>
+                    <div class="action-btns">
+                        <button class="act-btn act-accept" onclick="alert('Request accepted!')">Accept</button>
+                        <button class="act-btn act-decline" onclick="alert('Request declined')">Decline</button>
+                    </div>
+                </div>
+                <div class="sched-card">
+                    <div class="pat-avatar" style="background:linear-gradient(135deg,#1abc9c,#16a085);">NJ</div>
+                    <div class="sched-info">
+                        <div class="sched-name">Neha Joshi</div>
+                        <div class="sched-reason">Breathlessness · Requested: 27 May, 3 PM</div>
+                    </div>
+                    <div class="action-btns">
+                        <button class="act-btn act-accept" onclick="alert('Request accepted!')">Accept</button>
+                        <button class="act-btn act-decline" onclick="alert('Request declined')">Decline</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panels -->
+        <div>
+            <!-- Earnings Panel -->
+            <div class="panel">
+                <div class="section-hdr"><span class="sec-title">Weekly Earnings</span></div>
+                <div class="earn-total">₹38,400</div>
+                <div class="earn-sub">This month · +12% vs last month</div>
+                <br>
+                <div class="earn-row">
+                    <div class="earn-bar-wrap"><div class="earn-bar" style="height:45%;"></div><div class="earn-day">Mon</div></div>
+                    <div class="earn-bar-wrap"><div class="earn-bar" style="height:60%;"></div><div class="earn-day">Tue</div></div>
+                    <div class="earn-bar-wrap"><div class="earn-bar" style="height:40%;"></div><div class="earn-day">Wed</div></div>
+                    <div class="earn-bar-wrap"><div class="earn-bar" style="height:80%;"></div><div class="earn-day">Thu</div></div>
+                    <div class="earn-bar-wrap"><div class="earn-bar" style="height:55%;"></div><div class="earn-day">Fri</div></div>
+                    <div class="earn-bar-wrap"><div class="earn-bar today" style="height:90%;"></div><div class="earn-day" style="color:var(--blue);">Sat</div></div>
+                    <div class="earn-bar-wrap"><div class="earn-bar" style="height:20%;opacity:0.4;"></div><div class="earn-day">Sun</div></div>
+                </div>
+            </div>
+
+            <!-- Recent Patients -->
+            <div class="panel">
+                <div class="section-hdr">
+                    <span class="sec-title">Recent Patients</span>
+                    <button class="see-all">All →</button>
+                </div>
+                <div class="pat-row">
+                    <div class="pat-av" style="background:linear-gradient(135deg,#3498db,#2471a3);">RS</div>
+                    <div class="pat-info"><div class="pat-nm">Rahul Sharma</div><div class="pat-ag">Age 42 · Male</div></div>
+                    <span class="pat-status ps-stable">Stable</span>
+                </div>
+                <div class="pat-row">
+                    <div class="pat-av" style="background:linear-gradient(135deg,#9b59b6,#8e44ad);">PK</div>
+                    <div class="pat-info"><div class="pat-nm">Priya Kapoor</div><div class="pat-ag">Age 35 · Female</div></div>
+                    <span class="pat-status ps-review">Under Review</span>
+                </div>
+                <div class="pat-row">
+                    <div class="pat-av" style="background:linear-gradient(135deg,#e74c3c,#c0392b);">AM</div>
+                    <div class="pat-info"><div class="pat-nm">Amit Mishra</div><div class="pat-ag">Age 58 · Male</div></div>
+                    <span class="pat-status ps-critical">Critical</span>
+                </div>
+                <div class="pat-row">
+                    <div class="pat-av" style="background:linear-gradient(135deg,#e67e22,#d35400);">SK</div>
+                    <div class="pat-info"><div class="pat-nm">Sunita Khanna</div><div class="pat-ag">Age 49 · Female</div></div>
+                    <span class="pat-status ps-stable">Stable</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    function requireAuth() {
+        const loggedIn = localStorage.getItem('nexcare_logged_in') === 'true';
+        const user = JSON.parse(localStorage.getItem('nexcare_user') || 'null');
+        if (!loggedIn || !user) { window.location.href = 'auth.html'; return null; }
+        if (!user.role || user.role.toLowerCase() === 'patient') { window.location.href = 'patient-dashboard.html'; return null; }
+        return user;
+    }
+
+    const user = requireAuth();
+    if (user) {
+        const first = user.firstName || 'Doctor';
+        const initials = ((user.firstName?.[0]||'')+(user.lastName?.[0]||'')).toUpperCase()||'D';
+        document.getElementById('sb-avatar').textContent = initials;
+        document.getElementById('sb-name').textContent = 'Dr. ' + first + ' ' + (user.lastName||'');
+        const hour = new Date().getHours();
+        const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+        document.getElementById('greeting-name').textContent = greet + ', Dr. ' + first + ' 👨‍⚕️';
+        document.getElementById('greeting-date').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    }
+
+    function logoutUser() {
+        localStorage.removeItem('nexcare_logged_in');
+        localStorage.removeItem('nexcare_user');
+        window.location.href = 'auth.html';
+    }
+
+    function toggleStatus(el) {
+        const isAvail = el.textContent.includes('Available');
+        el.innerHTML = isAvail
+            ? '<div class="status-dot" style="background:#e67e22;"></div> Busy'
+            : '<div class="status-dot"></div> Available';
+        el.style.background = isAvail ? 'rgba(230,126,34,0.12)' : 'rgba(46,204,113,0.12)';
+        el.style.color = isAvail ? '#e67e22' : 'var(--green)';
+    }
+</script>
+</body>
+</html>

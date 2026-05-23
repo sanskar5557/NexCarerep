@@ -103,3 +103,63 @@ function closeMenu() {
     navLinks.classList.remove('active');
     mobileMenuToggle.querySelector('i').classList.replace('fa-times', 'fa-bars');
 }
+
+// ===== Auth State Management =====
+function getInitials(first, last) {
+    return ((first?.[0] || '') + (last?.[0] || '')).toUpperCase() || 'U';
+}
+
+function loadAuthState() {
+    const loggedIn = localStorage.getItem('nexcare_logged_in') === 'true';
+    const loginBtn  = document.getElementById('nav-login-btn');
+    const profileBtn = document.getElementById('nav-profile-btn');
+
+    if (loggedIn) {
+        const user = JSON.parse(localStorage.getItem('nexcare_user') || '{}');
+        const initials = getInitials(user.firstName, user.lastName);
+        const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ');
+
+        // Show profile avatar, hide login button
+        loginBtn.style.display = 'none';
+        profileBtn.style.display = 'block';
+
+        // Populate avatar initials
+        document.getElementById('nav-initials').textContent = initials;
+
+        // Populate dropdown
+        document.getElementById('pd-avatar-lg').textContent = initials;
+        document.getElementById('pd-name').textContent     = fullName || 'User';
+        document.getElementById('pd-role').textContent     = user.role || 'Patient';
+        document.getElementById('pd-email').textContent    = user.email || '—';
+        document.getElementById('pd-phone').textContent    = user.phone || '—';
+        document.getElementById('pd-joined').textContent   = user.joined ? 'Joined ' + user.joined : '—';
+    } else {
+        loginBtn.style.display = '';
+        profileBtn.style.display = 'none';
+    }
+}
+
+function toggleProfileDropdown() {
+    const dropdown = document.getElementById('profile-dropdown');
+    dropdown.classList.toggle('open');
+}
+
+function logoutUser() {
+    localStorage.removeItem('nexcare_logged_in');
+    localStorage.removeItem('nexcare_user');
+    // Close dropdown, swap back to login
+    document.getElementById('profile-dropdown').classList.remove('open');
+    loadAuthState();
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', (e) => {
+    const profileBtn = document.getElementById('nav-profile-btn');
+    const dropdown   = document.getElementById('profile-dropdown');
+    if (profileBtn && dropdown && !profileBtn.contains(e.target)) {
+        dropdown.classList.remove('open');
+    }
+});
+
+// Run on page load
+loadAuthState();

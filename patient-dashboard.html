@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexCare | Patient Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --blue: #3498DB; --blue-light: #EBF5FB; --blue-dark: #2471A3;
+            --green: #2ECC71; --green-light: #EAFAF1;
+            --dark: #0F172A; --card: #1E293B; --border: rgba(255,255,255,0.08);
+            --text: #F1F5F9; --muted: #94A3B8;
+            --radius: 16px; --radius-sm: 10px;
+            --transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif; }
+        body { background: var(--dark); color: var(--text); min-height:100vh; display:flex; }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px; flex-shrink:0;
+            background: var(--card);
+            border-right: 1px solid var(--border);
+            display: flex; flex-direction:column;
+            padding: 1.5rem 0;
+            position: fixed; height:100vh;
+            overflow-y:auto;
+        }
+        .sb-logo {
+            display:flex; align-items:center; gap:8px;
+            padding: 0 1.5rem 1.5rem;
+            font-size:1.4rem; font-weight:800;
+            border-bottom: 1px solid var(--border);
+        }
+        .sb-logo-dot { width:10px;height:10px;background:var(--green);border-radius:50%; }
+        .sb-logo span { color:var(--blue); }
+
+        .sb-user {
+            padding: 1.2rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .sb-user-avatar {
+            width:48px;height:48px;border-radius:50%;
+            background: linear-gradient(135deg,var(--green),var(--blue));
+            display:flex;align-items:center;justify-content:center;
+            font-weight:800;font-size:1.1rem;margin-bottom:0.6rem;
+        }
+        .sb-user-name { font-weight:700; font-size:0.95rem; }
+        .sb-user-badge {
+            display:inline-flex;align-items:center;gap:4px;
+            background:rgba(46,204,113,0.15);color:var(--green);
+            border:1px solid rgba(46,204,113,0.3);
+            font-size:0.7rem;font-weight:600;
+            padding:2px 8px;border-radius:20px;margin-top:3px;
+        }
+
+        .sb-nav { padding: 1rem 0; flex:1; }
+        .sb-nav-label {
+            font-size:0.65rem;font-weight:700;letter-spacing:0.1em;
+            color:var(--muted);text-transform:uppercase;
+            padding: 0.6rem 1.5rem 0.3rem;
+        }
+        .sb-link {
+            display:flex;align-items:center;gap:12px;
+            padding:0.7rem 1.5rem;
+            color:var(--muted);font-size:0.88rem;font-weight:500;
+            cursor:pointer;transition:var(--transition);
+            border-left:3px solid transparent;
+            text-decoration:none;
+        }
+        .sb-link:hover { color:var(--text);background:rgba(255,255,255,0.04); }
+        .sb-link.active {
+            color:var(--blue);background:rgba(52,152,219,0.1);
+            border-left-color:var(--blue);
+        }
+        .sb-link i { width:18px;text-align:center; }
+
+        .sb-footer { padding:1rem 1.5rem; border-top:1px solid var(--border); }
+        .btn-logout {
+            width:100%;padding:0.65rem;
+            background:rgba(239,68,68,0.1);color:#f87171;
+            border:1px solid rgba(239,68,68,0.2);
+            border-radius:var(--radius-sm);
+            font-size:0.85rem;font-weight:600;
+            cursor:pointer;display:flex;align-items:center;
+            justify-content:center;gap:8px;transition:var(--transition);
+        }
+        .btn-logout:hover { background:rgba(239,68,68,0.2); }
+
+        /* Main */
+        .main { margin-left:260px; flex:1; padding:2rem; min-height:100vh; }
+
+        /* Top bar */
+        .topbar {
+            display:flex;align-items:center;justify-content:space-between;
+            margin-bottom:2rem;
+        }
+        .topbar-greeting h2 { font-size:1.5rem;font-weight:800; }
+        .topbar-greeting p { color:var(--muted);font-size:0.88rem;margin-top:2px; }
+        .topbar-actions { display:flex;gap:0.8rem;align-items:center; }
+        .icon-btn {
+            width:40px;height:40px;border-radius:var(--radius-sm);
+            background:var(--card);border:1px solid var(--border);
+            color:var(--muted);display:flex;align-items:center;justify-content:center;
+            cursor:pointer;transition:var(--transition);font-size:0.9rem;
+        }
+        .icon-btn:hover { color:var(--text);border-color:rgba(255,255,255,0.2); }
+
+        /* Stats row */
+        .stats-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;margin-bottom:2rem; }
+        .stat-card {
+            background:var(--card);border:1px solid var(--border);
+            border-radius:var(--radius);padding:1.3rem;
+            display:flex;align-items:center;gap:1rem;
+            transition:var(--transition);
+        }
+        .stat-card:hover { border-color:rgba(255,255,255,0.15);transform:translateY(-2px); }
+        .stat-icon {
+            width:48px;height:48px;border-radius:12px;
+            display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;
+        }
+        .stat-icon.blue { background:rgba(52,152,219,0.15);color:var(--blue); }
+        .stat-icon.green { background:rgba(46,204,113,0.15);color:var(--green); }
+        .stat-icon.purple { background:rgba(155,89,182,0.15);color:#9b59b6; }
+        .stat-icon.orange { background:rgba(230,126,34,0.15);color:#e67e22; }
+        .stat-val { font-size:1.6rem;font-weight:800;line-height:1; }
+        .stat-label { color:var(--muted);font-size:0.78rem;margin-top:2px; }
+
+        /* Section */
+        .section-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem; }
+        .section-title { font-size:1rem;font-weight:700; }
+        .see-all { color:var(--blue);font-size:0.82rem;font-weight:600;cursor:pointer;background:none;border:none; }
+
+        /* Grid layout */
+        .dash-grid { display:grid;grid-template-columns:1fr 320px;gap:1.5rem; }
+
+        /* Appointments */
+        .appt-list { display:flex;flex-direction:column;gap:0.8rem; }
+        .appt-card {
+            background:var(--card);border:1px solid var(--border);
+            border-radius:var(--radius-sm);padding:1rem 1.2rem;
+            display:flex;align-items:center;gap:1rem;
+            transition:var(--transition);
+        }
+        .appt-card:hover { border-color:rgba(255,255,255,0.15); }
+        .appt-avatar {
+            width:44px;height:44px;border-radius:50%;flex-shrink:0;
+            background:linear-gradient(135deg,var(--blue-dark),var(--blue));
+            display:flex;align-items:center;justify-content:center;
+            font-weight:700;font-size:0.9rem;
+        }
+        .appt-info { flex:1; }
+        .appt-name { font-weight:600;font-size:0.9rem; }
+        .appt-spec { color:var(--muted);font-size:0.78rem; }
+        .appt-time {
+            display:flex;align-items:center;gap:5px;
+            font-size:0.78rem;color:var(--muted);margin-top:3px;
+        }
+        .appt-badge {
+            padding:4px 10px;border-radius:20px;font-size:0.72rem;font-weight:600;flex-shrink:0;
+        }
+        .badge-confirmed { background:rgba(46,204,113,0.15);color:var(--green); }
+        .badge-pending   { background:rgba(230,126,34,0.15);color:#e67e22; }
+        .badge-cancelled { background:rgba(239,68,68,0.1);color:#f87171; }
+
+        /* Side panel */
+        .panel-card {
+            background:var(--card);border:1px solid var(--border);
+            border-radius:var(--radius);padding:1.2rem;
+            margin-bottom:1.2rem;
+        }
+
+        /* Health metrics */
+        .metric-item {
+            display:flex;align-items:center;justify-content:space-between;
+            padding:0.7rem 0;border-bottom:1px solid var(--border);
+        }
+        .metric-item:last-child { border-bottom:none; }
+        .metric-label { color:var(--muted);font-size:0.82rem; }
+        .metric-val { font-weight:700;font-size:0.9rem; }
+        .metric-bar-wrap { width:80px;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden; }
+        .metric-bar { height:100%;border-radius:3px; }
+
+        /* Quick Book */
+        .quick-book-grid { display:grid;grid-template-columns:1fr 1fr;gap:0.6rem; }
+        .qb-btn {
+            display:flex;flex-direction:column;align-items:center;gap:5px;
+            padding:0.8rem;background:rgba(255,255,255,0.04);
+            border:1px solid var(--border);border-radius:var(--radius-sm);
+            cursor:pointer;transition:var(--transition);font-size:0.78rem;
+            color:var(--muted);font-weight:600;font-family:'Poppins',sans-serif;
+        }
+        .qb-btn i { font-size:1.2rem;color:var(--blue); }
+        .qb-btn:hover { background:rgba(52,152,219,0.1);border-color:rgba(52,152,219,0.3);color:var(--text); }
+
+        /* Search bar */
+        .search-bar {
+            display:flex;align-items:center;gap:10px;
+            background:var(--card);border:1px solid var(--border);
+            border-radius:var(--radius-sm);padding:0.6rem 1rem;
+            margin-bottom:1.2rem;
+        }
+        .search-bar i { color:var(--muted); }
+        .search-bar input {
+            background:none;border:none;outline:none;
+            color:var(--text);font-family:'Poppins',sans-serif;
+            font-size:0.88rem;flex:1;
+        }
+        .search-bar input::placeholder { color:var(--muted); }
+
+        /* Responsive */
+        @media(max-width:1024px){
+            .stats-grid { grid-template-columns:repeat(2,1fr); }
+            .dash-grid { grid-template-columns:1fr; }
+        }
+        @media(max-width:768px){
+            .sidebar { width:200px; }
+            .main { margin-left:200px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+    <div class="sb-logo">
+        <div class="sb-logo-dot"></div>Nex<span>Care</span>
+    </div>
+    <div class="sb-user">
+        <div class="sb-user-avatar" id="sb-avatar">P</div>
+        <div class="sb-user-name" id="sb-name">Patient</div>
+        <div class="sb-user-badge"><i class="fas fa-user-injured"></i> Patient</div>
+    </div>
+    <nav class="sb-nav">
+        <div class="sb-nav-label">Main</div>
+        <a class="sb-link active"><i class="fas fa-house"></i> Dashboard</a>
+        <a class="sb-link"><i class="fas fa-calendar-check"></i> My Appointments</a>
+        <a class="sb-link"><i class="fas fa-magnifying-glass"></i> Find Doctors</a>
+        <a class="sb-link"><i class="fas fa-file-medical"></i> Health Records</a>
+        <div class="sb-nav-label">More</div>
+        <a class="sb-link"><i class="fas fa-message"></i> Messages</a>
+        <a class="sb-link"><i class="fas fa-bell"></i> Notifications</a>
+        <a class="sb-link"><i class="fas fa-gear"></i> Settings</a>
+    </nav>
+    <div class="sb-footer">
+        <button class="btn-logout" onclick="logoutUser()">
+            <i class="fas fa-right-from-bracket"></i> Logout
+        </button>
+    </div>
+</aside>
+
+<!-- Main Content -->
+<main class="main">
+
+    <!-- Topbar -->
+    <div class="topbar">
+        <div class="topbar-greeting">
+            <h2 id="greeting-name">Good morning, Patient 👋</h2>
+            <p id="greeting-date">Loading...</p>
+        </div>
+        <div class="topbar-actions">
+            <div class="icon-btn" title="Notifications"><i class="fas fa-bell"></i></div>
+            <div class="icon-btn" title="Messages"><i class="fas fa-message"></i></div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon blue"><i class="fas fa-calendar-check"></i></div>
+            <div><div class="stat-val">3</div><div class="stat-label">Upcoming Appts</div></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon green"><i class="fas fa-user-doctor"></i></div>
+            <div><div class="stat-val">2</div><div class="stat-label">Doctors Consulted</div></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon purple"><i class="fas fa-file-medical"></i></div>
+            <div><div class="stat-val">7</div><div class="stat-label">Health Reports</div></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon orange"><i class="fas fa-heart-pulse"></i></div>
+            <div><div class="stat-val">98%</div><div class="stat-label">Health Score</div></div>
+        </div>
+    </div>
+
+    <!-- Search Doctors -->
+    <div class="search-bar">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Search for doctors, specializations...">
+    </div>
+
+    <!-- Main grid -->
+    <div class="dash-grid">
+
+        <!-- Left: Appointments -->
+        <div>
+            <div class="section-header">
+                <span class="section-title">Upcoming Appointments</span>
+                <button class="see-all">See all →</button>
+            </div>
+            <div class="appt-list">
+                <div class="appt-card">
+                    <div class="appt-avatar">DC</div>
+                    <div class="appt-info">
+                        <div class="appt-name">Dr. Divya Chauhan</div>
+                        <div class="appt-spec">Cardiologist · Max Hospital</div>
+                        <div class="appt-time"><i class="fas fa-clock"></i> Tomorrow, 10:30 AM</div>
+                    </div>
+                    <span class="appt-badge badge-confirmed">Confirmed</span>
+                </div>
+                <div class="appt-card">
+                    <div class="appt-avatar">RK</div>
+                    <div class="appt-info">
+                        <div class="appt-name">Dr. Rohit Kumar</div>
+                        <div class="appt-spec">Dermatologist · Apollo</div>
+                        <div class="appt-time"><i class="fas fa-clock"></i> 26 May, 2:00 PM</div>
+                    </div>
+                    <span class="appt-badge badge-pending">Pending</span>
+                </div>
+                <div class="appt-card">
+                    <div class="appt-avatar">AS</div>
+                    <div class="appt-info">
+                        <div class="appt-name">Dr. Ananya Sharma</div>
+                        <div class="appt-spec">General Physician · Fortis</div>
+                        <div class="appt-time"><i class="fas fa-clock"></i> 30 May, 9:00 AM</div>
+                    </div>
+                    <span class="appt-badge badge-confirmed">Confirmed</span>
+                </div>
+            </div>
+
+            <br>
+            <div class="section-header">
+                <span class="section-title">Recommended Doctors</span>
+            </div>
+            <div class="appt-list">
+                <div class="appt-card">
+                    <div class="appt-avatar" style="background:linear-gradient(135deg,#9b59b6,#8e44ad);">PG</div>
+                    <div class="appt-info">
+                        <div class="appt-name">Dr. Priya Gupta</div>
+                        <div class="appt-spec">Neurologist · AIIMS Delhi</div>
+                        <div class="appt-time"><i class="fas fa-star" style="color:#f1c40f;"></i> 4.9 · 200+ Reviews</div>
+                    </div>
+                    <button onclick="alert('Booking flow coming soon!')" style="padding:6px 14px;background:rgba(52,152,219,0.15);color:var(--blue);border:1px solid rgba(52,152,219,0.3);border-radius:8px;font-size:0.78rem;font-weight:600;cursor:pointer;">Book</button>
+                </div>
+                <div class="appt-card">
+                    <div class="appt-avatar" style="background:linear-gradient(135deg,#e67e22,#d35400);">MV</div>
+                    <div class="appt-info">
+                        <div class="appt-name">Dr. Manish Verma</div>
+                        <div class="appt-spec">Orthopaedic · Medanta</div>
+                        <div class="appt-time"><i class="fas fa-star" style="color:#f1c40f;"></i> 4.7 · 150+ Reviews</div>
+                    </div>
+                    <button onclick="alert('Booking flow coming soon!')" style="padding:6px 14px;background:rgba(52,152,219,0.15);color:var(--blue);border:1px solid rgba(52,152,219,0.3);border-radius:8px;font-size:0.78rem;font-weight:600;cursor:pointer;">Book</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Panels -->
+        <div>
+            <!-- Quick Book -->
+            <div class="panel-card">
+                <div class="section-header"><span class="section-title">Quick Book</span></div>
+                <div class="quick-book-grid">
+                    <button class="qb-btn"><i class="fas fa-heart-pulse"></i>Cardiology</button>
+                    <button class="qb-btn"><i class="fas fa-brain"></i>Neurology</button>
+                    <button class="qb-btn"><i class="fas fa-bone"></i>Orthopaedic</button>
+                    <button class="qb-btn"><i class="fas fa-eye"></i>Ophthalmology</button>
+                    <button class="qb-btn"><i class="fas fa-tooth"></i>Dentist</button>
+                    <button class="qb-btn"><i class="fas fa-child"></i>Paediatric</button>
+                </div>
+            </div>
+
+            <!-- Health Metrics -->
+            <div class="panel-card">
+                <div class="section-header"><span class="section-title">Health Metrics</span></div>
+                <div class="metric-item">
+                    <div>
+                        <div class="metric-label">Blood Pressure</div>
+                        <div class="metric-val">120/80</div>
+                    </div>
+                    <div class="metric-bar-wrap"><div class="metric-bar" style="width:70%;background:#2ECC71;"></div></div>
+                </div>
+                <div class="metric-item">
+                    <div>
+                        <div class="metric-label">Blood Sugar</div>
+                        <div class="metric-val">95 mg/dL</div>
+                    </div>
+                    <div class="metric-bar-wrap"><div class="metric-bar" style="width:60%;background:#3498DB;"></div></div>
+                </div>
+                <div class="metric-item">
+                    <div>
+                        <div class="metric-label">Heart Rate</div>
+                        <div class="metric-val">72 bpm</div>
+                    </div>
+                    <div class="metric-bar-wrap"><div class="metric-bar" style="width:55%;background:#9b59b6;"></div></div>
+                </div>
+                <div class="metric-item">
+                    <div>
+                        <div class="metric-label">BMI</div>
+                        <div class="metric-val">22.4</div>
+                    </div>
+                    <div class="metric-bar-wrap"><div class="metric-bar" style="width:65%;background:#e67e22;"></div></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script>
+    function requireAuth() {
+        const loggedIn = localStorage.getItem('nexcare_logged_in') === 'true';
+        const user = JSON.parse(localStorage.getItem('nexcare_user') || 'null');
+        if (!loggedIn || !user) { window.location.href = 'auth.html'; return null; }
+        if (user.role && user.role.toLowerCase() === 'doctor') { window.location.href = 'doctor-dashboard.html'; return null; }
+        return user;
+    }
+
+    const user = requireAuth();
+    if (user) {
+        const first = user.firstName || 'Patient';
+        const initials = ((user.firstName?.[0] || '') + (user.lastName?.[0] || '')).toUpperCase() || 'P';
+        document.getElementById('sb-avatar').textContent = initials;
+        document.getElementById('sb-name').textContent = first + ' ' + (user.lastName || '');
+        const hour = new Date().getHours();
+        const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+        document.getElementById('greeting-name').textContent = greet + ', ' + first + ' 👋';
+        document.getElementById('greeting-date').textContent = new Date().toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+    }
+
+    function logoutUser() {
+        localStorage.removeItem('nexcare_logged_in');
+        localStorage.removeItem('nexcare_user');
+        window.location.href = 'auth.html';
+    }
+</script>
+</body>
+</html>

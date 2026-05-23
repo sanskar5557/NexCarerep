@@ -27,6 +27,38 @@
             <a href="javascript:void(0)" onclick="closeMenu(); scrollToSlide(7)">Business</a>
             <a href="javascript:void(0)" onclick="closeMenu(); scrollToSlide(10)">Team</a>
             <button class="btn btn-primary btn-sm" onclick="closeMenu(); scrollToSlide(11)">Contact</button>
+            <!-- Auth Nav: toggled by JS -->
+            <div id="auth-nav-area">
+                <!-- Shown when logged out -->
+                <a href="auth.html" id="nav-login-btn" class="btn btn-primary btn-sm" style="text-decoration:none; background: linear-gradient(135deg,#2ECC71,#27ae60);">Login</a>
+                <!-- Shown when logged in -->
+                <div id="nav-profile-btn" style="display:none; position:relative;">
+                    <button id="profile-avatar-btn" onclick="toggleProfileDropdown()" title="My Profile">
+                        <div class="profile-avatar-ring">
+                            <div class="profile-avatar-initials" id="nav-initials">U</div>
+                        </div>
+                    </button>
+                    <!-- Dropdown -->
+                    <div class="profile-dropdown" id="profile-dropdown">
+                        <div class="pd-header">
+                            <div class="pd-avatar-lg" id="pd-avatar-lg">U</div>
+                            <div class="pd-info">
+                                <p class="pd-name" id="pd-name">User</p>
+                                <p class="pd-role" id="pd-role">Patient</p>
+                            </div>
+                        </div>
+                        <div class="pd-details">
+                            <div class="pd-row"><i class="fas fa-envelope"></i><span id="pd-email">—</span></div>
+                            <div class="pd-row"><i class="fas fa-phone"></i><span id="pd-phone">—</span></div>
+                            <div class="pd-row"><i class="fas fa-calendar-check"></i><span id="pd-joined">—</span></div>
+                        </div>
+                        <div class="pd-actions">
+                            <a href="auth.html" class="pd-btn pd-btn-edit"><i class="fas fa-user-pen"></i> Edit Profile</a>
+                            <button class="pd-btn pd-btn-logout" onclick="logoutUser()"><i class="fas fa-right-from-bracket"></i> Logout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="nav-actions">
             <button class="theme-toggle" id="theme-toggle" title="Toggle Dark Mode">

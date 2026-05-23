@@ -735,3 +735,197 @@ body.dark-mode .iphone-frame {
         height: 400px;
     }
 }
+
+/* ===== Profile Avatar & Dropdown ===== */
+#profile-avatar-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+}
+
+.profile-avatar-ring {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2ECC71, #3498DB);
+    padding: 2.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 0 2px rgba(52,152,219,0.3);
+    transition: all 0.3s ease;
+}
+
+.profile-avatar-ring:hover {
+    box-shadow: 0 0 0 3px rgba(52,152,219,0.6);
+    transform: scale(1.08);
+}
+
+.profile-avatar-initials {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--primary-dark);
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.5px;
+}
+
+/* Dropdown */
+.profile-dropdown {
+    position: absolute;
+    top: calc(100% + 14px);
+    right: 0;
+    width: 280px;
+    background: var(--bg-white);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.05);
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-10px) scale(0.97);
+    pointer-events: none;
+    transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+    z-index: 999;
+}
+
+.profile-dropdown.open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: all;
+}
+
+/* Dropdown Header */
+.pd-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.2rem 1.4rem;
+    background: linear-gradient(135deg, #2C3E50, #1a252f);
+    color: white;
+}
+
+.pd-avatar-lg {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2ECC71, #3498DB);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: white;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.pd-info { flex: 1; }
+
+.pd-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 2px;
+}
+
+.pd-role {
+    font-size: 0.75rem;
+    color: #2ECC71;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+/* Details */
+.pd-details {
+    padding: 0.8rem 1.4rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.pd-row {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.45rem 0;
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+}
+
+.pd-row i {
+    color: var(--primary-blue);
+    width: 14px;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+.pd-row span {
+    color: var(--text-primary);
+    font-weight: 500;
+    word-break: break-all;
+}
+
+/* Actions */
+.pd-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.8rem 1rem;
+}
+
+.pd-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 0.8rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    width: 100%;
+    text-align: left;
+}
+
+.pd-btn-edit {
+    background: var(--bg-light-blue);
+    color: var(--primary-blue);
+}
+.pd-btn-edit:hover {
+    background: var(--primary-blue);
+    color: white;
+}
+
+.pd-btn-logout {
+    background: #FEF2F2;
+    color: #EF4444;
+}
+.pd-btn-logout:hover {
+    background: #EF4444;
+    color: white;
+}
+
+/* Dark mode adjustments */
+body.dark-mode .profile-dropdown {
+    background: var(--dark-card);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+body.dark-mode .pd-row span { color: var(--dark-text); }
+body.dark-mode .pd-btn-edit {
+    background: rgba(52,152,219,0.15);
+    color: #5dade2;
+}
+body.dark-mode .pd-btn-logout {
+    background: rgba(239,68,68,0.1);
+    color: #f87171;
+}
+
