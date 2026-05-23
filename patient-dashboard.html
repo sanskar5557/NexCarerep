@@ -510,6 +510,8 @@
     </div>
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-client.js"></script>
 <script>
     function requireAuth() {
         const loggedIn = localStorage.getItem('nexcare_logged_in') === 'true';
@@ -531,7 +533,8 @@
         document.getElementById('greeting-date').textContent = new Date().toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
     }
 
-    function logoutUser() {
+    async function logoutUser() {
+        await supabase.auth.signOut();
         localStorage.removeItem('nexcare_logged_in');
         localStorage.removeItem('nexcare_user');
         window.location.href = 'auth.html';
@@ -544,38 +547,42 @@
         const target = document.getElementById('view-' + tabId);
         if(target) target.classList.add('active');
     }
-    function getAppointments() {
-        return JSON.parse(localStorage.getItem('nexcare_appointments') || '[]');
-    }
-    function saveAppointments(appts) {
-        localStorage.setItem('nexcare_appointments', JSON.stringify(appts));
-    }
-
-    function bookAppointment(docEmail, docName) {
-        const appts = getAppointments();
+    async function bookAppointment(docEmail, docName) {
         const newAppt = {
-            id: Date.now().toString(),
-            doctorEmail: docEmail,
-            doctorName: docName,
-            patientEmail: user.email,
-            patientName: user.firstName + ' ' + (user.lastName || ''),
-            patientInitials: ((user.firstName?.[0]||'')+(user.lastName?.[0]||'')).toUpperCase() || 'P',
+            doctor_email: docEmail,
+            doctor_name: docName,
+            patient_email: user.email,
+            patient_name: user.firstName + ' ' + (user.lastName || ''),
+            patient_initials: ((user.firstName?.[0]||'')+(user.lastName?.[0]||'')).toUpperCase() || 'P',
             status: 'Pending',
             time: 'Requested just now'
         };
-        appts.push(newAppt);
-        saveAppointments(appts);
+        
+        const { error } = await supabase
+            .from('appointments')
+            .insert([newAppt]);
+
+        if (error) {
+            alert('Error booking appointment: ' + error.message);
+            return;
+        }
+
         alert('Appointment requested successfully!');
         loadPatientAppointments();
     }
 
-    function loadPatientAppointments() {
-        const appts = getAppointments().filter(a => a.patientEmail === user.email);
+    async function loadPatientAppointments() {
         const container1 = document.getElementById('upcoming-appointments-list');
         const container2 = document.getElementById('all-appointments-list');
         if (!container1 || !container2) return;
 
-        if (appts.length === 0) {
+        const { data: appts, error } = await supabase
+            .from('appointments')
+            .select('*')
+            .eq('patient_email', user.email)
+            .order('created_at', { ascending: false });
+
+        if (error || !appts || appts.length === 0) {
             const emptyHtml = `
                 <div class="panel-card empty-state" style="padding: 2rem 1rem; border: none; background: transparent;">
                     <i class="fas fa-calendar-times" style="font-size: 2rem;"></i>
@@ -590,12 +597,12 @@
         let html = '';
         appts.forEach(a => {
             const badgeClass = a.status === 'Confirmed' ? 'badge-confirmed' : (a.status === 'Declined' ? 'badge-cancelled' : 'badge-pending');
-            const docInitials = a.doctorName.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+            const docInitials = a.doctor_name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
             html += `
             <div class="appt-card">
                 <div class="appt-avatar" style="background:linear-gradient(135deg,var(--purple),#8e44ad);">${docInitials}</div>
                 <div class="appt-info">
-                    <div class="appt-name">Dr. ${a.doctorName}</div>
+                    <div class="appt-name">Dr. ${a.doctor_name}</div>
                     <div class="appt-time"><i class="fas fa-clock"></i> ${a.time}</div>
                 </div>
                 <span class="appt-badge ${badgeClass}">${a.status}</span>
@@ -606,54 +613,58 @@
         container2.innerHTML = html;
     }
 
-    function loadRegisteredDoctors() {
+    async function loadRegisteredDoctors() {
         const container = document.getElementById('registered-doctors-list');
         if (!container) return;
 
-        const registryStr = localStorage.getItem('nexcare_registry');
-        const registry = registryStr ? JSON.parse(registryStr) : {};
+        const { data: doctors, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('role', 'Doctor');
+
+        if (error || !doctors || doctors.length === 0) {
+            const emptyHtml = `<p style="color:var(--muted); font-size:0.85rem; padding: 1rem 0;">No registered doctors found in the system yet.</p>`;
+            container.innerHTML = emptyHtml;
+            const allDocsContainer = document.getElementById('all-doctors-list');
+            if(allDocsContainer) allDocsContainer.innerHTML = emptyHtml;
+            return;
+        }
         
         let html = '';
-        let doctorCount = 0;
+        doctors.forEach(u => {
+            const fname = u.first_name || 'Doctor';
+            const lname = u.last_name || '';
+            const initials = ((fname[0]||'') + (lname[0]||'')).toUpperCase() || 'D';
+            const joinDate = u.joined || 'Recently';
 
-        for (const email in registry) {
-            const u = registry[email];
-            if (u.role && u.role.toLowerCase() === 'doctor') {
-                doctorCount++;
-                const fname = u.firstName || 'Doctor';
-                const lname = u.lastName || '';
-                const initials = ((fname[0]||'') + (lname[0]||'')).toUpperCase() || 'D';
-                const joinDate = u.joined || 'Recently';
-
-                html += `
-                <div class="appt-card">
-                    <div class="appt-avatar" style="background:linear-gradient(135deg,var(--blue),var(--blue-dark));">${initials}</div>
-                    <div class="appt-info">
-                        <div class="appt-name">Dr. ${fname} ${lname}</div>
-                        <div class="appt-spec">Consultant · Joined ${joinDate}</div>
-                        <div class="appt-time"><i class="fas fa-envelope" style="color:var(--muted);"></i> ${email}</div>
-                    </div>
-                    <button onclick="bookAppointment('${email}', '${fname} ${lname}')" style="padding:6px 14px;background:rgba(52,152,219,0.15);color:var(--blue);border:1px solid rgba(52,152,219,0.3);border-radius:8px;font-size:0.78rem;font-weight:600;cursor:pointer;">Book</button>
-                </div>`;
-            }
-        }
-
-        if (doctorCount === 0) {
-            html = `<p style="color:var(--muted); font-size:0.85rem; padding: 1rem 0;">No registered doctors found in the system yet.</p>`;
-        }
+            html += `
+            <div class="appt-card">
+                <div class="appt-avatar" style="background:linear-gradient(135deg,var(--blue),var(--blue-dark));">${initials}</div>
+                <div class="appt-info">
+                    <div class="appt-name">Dr. ${fname} ${lname}</div>
+                    <div class="appt-spec">Consultant · Joined ${joinDate}</div>
+                    <div class="appt-time"><i class="fas fa-envelope" style="color:var(--muted);"></i> ${u.email}</div>
+                </div>
+                <button onclick="bookAppointment('${u.email}', '${fname} ${lname}')" style="padding:6px 14px;background:rgba(52,152,219,0.15);color:var(--blue);border:1px solid rgba(52,152,219,0.3);border-radius:8px;font-size:0.78rem;font-weight:600;cursor:pointer;">Book</button>
+            </div>`;
+        });
         
         container.innerHTML = html;
         const allDocsContainer = document.getElementById('all-doctors-list');
         if(allDocsContainer) allDocsContainer.innerHTML = html;
     }
 
-    function loadPatientPrescriptions() {
-        const rxsStr = localStorage.getItem('nexcare_prescriptions');
-        const rxs = rxsStr ? JSON.parse(rxsStr).filter(r => r.patientEmail === user.email) : [];
+    async function loadPatientPrescriptions() {
         const container = document.getElementById('patient-prescriptions-list');
         if (!container) return;
 
-        if (rxs.length === 0) {
+        const { data: rxs, error } = await supabase
+            .from('prescriptions')
+            .select('*')
+            .eq('patient_email', user.email)
+            .order('created_at', { ascending: false });
+
+        if (error || !rxs || rxs.length === 0) {
             container.innerHTML = `
                 <div class="panel-card empty-state" style="padding: 2rem 1rem; border: none; background: transparent;">
                     <i class="fas fa-file-prescription" style="font-size: 2rem;"></i>
@@ -664,17 +675,17 @@
         }
 
         let html = '';
-        rxs.reverse().forEach(rx => {
+        rxs.forEach(rx => {
             html += `
             <div class="a4-prescription">
                 <button onclick="window.print()" style="position:absolute; top:2.5rem; right:3rem; padding:6px 12px; background:var(--blue); color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:0.8rem;" class="print-btn"><i class="fas fa-print"></i> Print</button>
                 <div class="a4-header">
                     <div class="a4-doc-info">
-                        <h2>Dr. ${rx.doctorName}</h2>
+                        <h2>Dr. ${rx.doctor_name}</h2>
                         <p><strong>General Consultant</strong></p>
                         <p>NexCare Health Institute</p>
                         <p>123 Medical Boulevard, Care City, 40001</p>
-                        <p><i class="fas fa-envelope"></i> ${rx.doctorEmail} | <i class="fas fa-phone"></i> +91 98765 43210</p>
+                        <p><i class="fas fa-envelope"></i> ${rx.doctor_email} | <i class="fas fa-phone"></i> +91 98765 43210</p>
                     </div>
                     <div class="a4-clinic-logo">
                         <div class="dot"></div>Nex<span>Care</span>
@@ -683,8 +694,8 @@
                 
                 <div class="a4-meta">
                     <div>
-                        <p>Patient Name: <strong>${rx.patientName}</strong></p>
-                        <p>Patient Email: <strong>${rx.patientEmail}</strong></p>
+                        <p>Patient Name: <strong>${rx.patient_name}</strong></p>
+                        <p>Patient Email: <strong>${rx.patient_email}</strong></p>
                     </div>
                     <div style="text-align: right;">
                         <p>Date: <strong>${rx.date}</strong></p>
@@ -702,7 +713,7 @@
                     </div>
                     <div class="a4-sign">
                         <div class="a4-sign-line"></div>
-                        <p><strong>Dr. ${rx.doctorName}</strong></p>
+                        <p><strong>Dr. ${rx.doctor_name}</strong></p>
                         <p style="font-size: 0.75rem;">Digitally Signed</p>
                     </div>
                 </div>

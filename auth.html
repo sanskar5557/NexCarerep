@@ -675,6 +675,8 @@
 
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js"></script>
     <script>
         // ---- Helpers ----
         function showMsg(id, type, text) {
@@ -686,14 +688,6 @@
             const el = document.getElementById(id);
             el.className = 'auth-msg';
             el.textContent = '';
-        }
-
-        // ---- Registry helpers ----
-        function getRegistry() {
-            return JSON.parse(localStorage.getItem('nexcare_registry') || '{}');
-        }
-        function saveRegistry(reg) {
-            localStorage.setItem('nexcare_registry', JSON.stringify(reg));
         }
 
         // Toggle password visibility
@@ -728,93 +722,121 @@
         }
 
         // ---- LOGIN ----
-        function handleLogin(e) {
+        async function handleLogin(e) {
             e.preventDefault();
             hideMsg('login-msg');
             const btn      = e.target.querySelector('.btn-submit');
             const email    = document.getElementById('login-email').value.trim().toLowerCase();
             const password = document.getElementById('login-password').value;
-            const registry = getRegistry();
 
-            // Check if user exists
-            if (!registry[email]) {
-                showMsg('login-msg', 'error', 'No account found. Please sign up first.');
-                return;
-            }
-            // Check password
-            if (registry[email].password !== password) {
-                showMsg('login-msg', 'error', 'Incorrect password. Please try again.');
-                return;
-            }
-
-            // Credentials valid
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
             btn.disabled  = true;
 
-            const user = { ...registry[email] };
-            delete user.password; // don't store plain password in session
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-            setTimeout(() => {
-                localStorage.setItem('nexcare_user', JSON.stringify(user));
-                localStorage.setItem('nexcare_logged_in', 'true');
-                btn.innerHTML = '<i class="fas fa-check"></i> Success! Redirecting...';
-                btn.style.background = 'linear-gradient(135deg,#2ecc71,#27ae60)';
-                const dest = (user.role||'').toLowerCase() === 'doctor' ? 'doctor-dashboard.html' : 'patient-dashboard.html';
-                setTimeout(() => { window.location.href = dest; }, 900);
-            }, 1200);
+            if (error) {
+                showMsg('login-msg', 'error', error.message);
+                btn.innerHTML = '<i class="fas fa-right-to-bracket"></i> Login to NexCare';
+                btn.disabled = false;
+                return;
+            }
+
+            // Fetch profile
+            const { data: profile, error: profileError } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', data.user.id)
+                .single();
+
+            if (profileError || !profile) {
+                showMsg('login-msg', 'error', 'Error fetching user profile.');
+                btn.innerHTML = '<i class="fas fa-right-to-bracket"></i> Login to NexCare';
+                btn.disabled = false;
+                return;
+            }
+
+            const sessionUser = { ...profile, email: data.user.email };
+            localStorage.setItem('nexcare_user', JSON.stringify(sessionUser));
+            localStorage.setItem('nexcare_logged_in', 'true');
+
+            btn.innerHTML = '<i class="fas fa-check"></i> Success! Redirecting...';
+            btn.style.background = 'linear-gradient(135deg,#2ecc71,#27ae60)';
+            const dest = (profile.role || '').toLowerCase() === 'doctor' ? 'doctor-dashboard.html' : 'patient-dashboard.html';
+            setTimeout(() => { window.location.href = dest; }, 900);
         }
 
         // ---- SIGN UP ----
-        function handleSignup(e) {
+        async function handleSignup(e) {
             e.preventDefault();
             hideMsg('signup-msg');
             const btn      = e.target.querySelector('.btn-submit');
             const email    = document.getElementById('signup-email').value.trim().toLowerCase();
             const password = document.getElementById('signup-password').value;
-            const registry = getRegistry();
 
-            // Check duplicate email
-            if (registry[email]) {
-                showMsg('signup-msg', 'error', 'An account with this email already exists. Please log in.');
-                return;
-            }
-            // Minimum password length
             if (password.length < 6) {
                 showMsg('signup-msg', 'error', 'Password must be at least 6 characters.');
                 return;
             }
 
-            const role = document.querySelector('input[name="role"]:checked').value;
-            const userData = {
-                firstName: document.getElementById('signup-fname').value.trim(),
-                lastName:  document.getElementById('signup-lname').value.trim(),
-                email:     email,
-                phone:     document.getElementById('signup-phone').value.trim(),
-                role:      role.charAt(0).toUpperCase() + role.slice(1),
-                joined:    new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}),
-                password:  password  // stored only in registry
-            };
+            const roleRaw = document.querySelector('input[name="role"]:checked').value;
+            const role = roleRaw.charAt(0).toUpperCase() + roleRaw.slice(1);
+            const firstName = document.getElementById('signup-fname').value.trim();
+            const lastName = document.getElementById('signup-lname').value.trim();
+            const phone = document.getElementById('signup-phone').value.trim();
 
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
             btn.disabled  = true;
 
-            setTimeout(() => {
-                // Save to registry
-                registry[email] = userData;
-                saveRegistry(registry);
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password
+            });
 
-                // Log in immediately
-                const session = { ...userData };
-                delete session.password;
-                localStorage.setItem('nexcare_user', JSON.stringify(session));
-                localStorage.setItem('nexcare_logged_in', 'true');
+            if (error) {
+                showMsg('signup-msg', 'error', error.message);
+                btn.innerHTML = '<i class="fas fa-user-plus"></i> Create My Account';
+                btn.disabled = false;
+                return;
+            }
 
-                btn.innerHTML = '<i class="fas fa-check"></i> Account Created!';
-                btn.style.background = 'linear-gradient(135deg,#3498db,#2471a3)';
-                showMsg('signup-msg', 'success', 'Account created! Redirecting...');
-                const dest = userData.role.toLowerCase() === 'doctor' ? 'doctor-dashboard.html' : 'patient-dashboard.html';
-                setTimeout(() => { window.location.href = dest; }, 900);
-            }, 1400);
+            // Insert into profiles
+            const { error: profileError } = await supabase
+                .from('profiles')
+                .insert([
+                    {
+                        id: data.user.id,
+                        first_name: firstName,
+                        last_name: lastName,
+                        email: email,
+                        phone: phone,
+                        role: role,
+                        joined: new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})
+                    }
+                ]);
+
+            if (profileError) {
+                showMsg('signup-msg', 'error', 'Error creating profile: ' + profileError.message);
+                btn.innerHTML = '<i class="fas fa-user-plus"></i> Create My Account';
+                btn.disabled = false;
+                return;
+            }
+
+            const sessionUser = {
+                id: data.user.id,
+                email: email,
+                firstName: firstName,
+                lastName: lastName,
+                phone: phone,
+                role: role
+            };
+            localStorage.setItem('nexcare_user', JSON.stringify(sessionUser));
+            localStorage.setItem('nexcare_logged_in', 'true');
+
+            btn.innerHTML = '<i class="fas fa-check"></i> Account Created!';
+            btn.style.background = 'linear-gradient(135deg,#3498db,#2471a3)';
+            showMsg('signup-msg', 'success', 'Account created! Redirecting...');
+            const dest = role.toLowerCase() === 'doctor' ? 'doctor-dashboard.html' : 'patient-dashboard.html';
+            setTimeout(() => { window.location.href = dest; }, 900);
         }
 
         // Social auth placeholder

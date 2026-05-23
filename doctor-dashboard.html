@@ -469,6 +469,8 @@
 
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-client.js"></script>
 <script>
     function requireAuth() {
         const loggedIn = localStorage.getItem('nexcare_logged_in') === 'true';
@@ -490,7 +492,8 @@
         document.getElementById('greeting-date').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
     }
 
-    function logoutUser() {
+    async function logoutUser() {
+        await supabase.auth.signOut();
         localStorage.removeItem('nexcare_logged_in');
         localStorage.removeItem('nexcare_user');
         window.location.href = 'auth.html';
@@ -513,31 +516,30 @@
         if(target) target.classList.add('active');
     }
 
-    function getAppointments() {
-        return JSON.parse(localStorage.getItem('nexcare_appointments') || '[]');
-    }
+    async function updateAppointmentStatus(id, newStatus) {
+        const { error } = await supabase
+            .from('appointments')
+            .update({ status: newStatus })
+            .eq('id', id);
 
-    function saveAppointments(appts) {
-        localStorage.setItem('nexcare_appointments', JSON.stringify(appts));
-    }
-
-    function updateAppointmentStatus(id, newStatus) {
-        const appts = getAppointments();
-        const appt = appts.find(a => a.id === id);
-        if (appt) {
-            appt.status = newStatus;
-            saveAppointments(appts);
+        if (!error) {
             loadDoctorAppointments();
         }
     }
 
-    function loadDoctorAppointments() {
+    async function loadDoctorAppointments() {
         if (!user || !user.email) return;
-        const appts = getAppointments().filter(a => a.doctorEmail === user.email);
-        
+
         const scheduleList = document.getElementById('todays-schedule-list');
         const requestsList = document.getElementById('pending-requests-list');
         if (!scheduleList || !requestsList) return;
+
+        const { data: appts, error } = await supabase
+            .from('appointments')
+            .select('*')
+            .eq('doctor_email', user.email);
+
+        if (error || !appts) return;
 
         const confirmed = appts.filter(a => a.status === 'Confirmed');
         const pending = appts.filter(a => a.status === 'Pending');
@@ -556,9 +558,9 @@
                 <div class="sched-card">
                     <div class="sched-time"><div class="t" style="font-size:0.9rem;">Today</div></div>
                     <div class="sched-sep"></div>
-                    <div class="pat-avatar" style="background:linear-gradient(135deg,#3498db,#2471a3);">${a.patientInitials}</div>
+                    <div class="pat-avatar" style="background:linear-gradient(135deg,#3498db,#2471a3);">${a.patient_initials}</div>
                     <div class="sched-info">
-                        <div class="sched-name">${a.patientName}</div>
+                        <div class="sched-name">${a.patient_name}</div>
                         <div class="sched-reason">Consultation</div>
                     </div>
                     <span class="sched-badge sb-followup">Confirmed</span>
@@ -582,9 +584,9 @@
             pending.forEach(a => {
                 html += `
                 <div class="sched-card">
-                    <div class="pat-avatar" style="background:linear-gradient(135deg,#2ecc71,#27ae60);">${a.patientInitials}</div>
+                    <div class="pat-avatar" style="background:linear-gradient(135deg,#2ecc71,#27ae60);">${a.patient_initials}</div>
                     <div class="sched-info">
-                        <div class="sched-name">${a.patientName}</div>
+                        <div class="sched-name">${a.patient_name}</div>
                         <div class="sched-reason">Consultation Request · ${a.time}</div>
                     </div>
                     <div class="action-btns">
@@ -597,23 +599,20 @@
         }
     }
 
-    function getPrescriptions() {
-        return JSON.parse(localStorage.getItem('nexcare_prescriptions') || '[]');
-    }
-
-    function savePrescriptions(rxs) {
-        localStorage.setItem('nexcare_prescriptions', JSON.stringify(rxs));
-    }
-
-    function populatePrescriptionForm() {
+    async function populatePrescriptionForm() {
         if(!user) return;
-        const appts = getAppointments().filter(a => a.doctorEmail === user.email && a.status === 'Confirmed');
+        const { data: appts } = await supabase
+            .from('appointments')
+            .select('*')
+            .eq('doctor_email', user.email)
+            .eq('status', 'Confirmed');
+
         const select = document.getElementById('rx-patient-select');
-        if(!select) return;
+        if(!select || !appts) return;
         
         const patients = {};
         appts.forEach(a => {
-            patients[a.patientEmail] = a.patientName;
+            patients[a.patient_email] = a.patient_name;
         });
 
         let html = '<option value="">Select a confirmed patient...</option>';
@@ -623,7 +622,7 @@
         select.innerHTML = html;
     }
 
-    function submitPrescription() {
+    async function submitPrescription() {
         const select = document.getElementById('rx-patient-select');
         const notes = document.getElementById('rx-notes');
         const patientEmail = select.value;
@@ -635,17 +634,21 @@
             return;
         }
 
-        const rxs = getPrescriptions();
-        rxs.push({
-            id: Date.now().toString(),
-            doctorEmail: user.email,
-            doctorName: user.firstName + ' ' + (user.lastName||''),
-            patientEmail: patientEmail,
-            patientName: patientName,
-            notes: text,
-            date: new Date().toLocaleDateString('en-IN')
-        });
-        savePrescriptions(rxs);
+        const { error } = await supabase
+            .from('prescriptions')
+            .insert([{
+                doctor_email: user.email,
+                doctor_name: user.firstName + ' ' + (user.lastName||''),
+                patient_email: patientEmail,
+                patient_name: patientName,
+                notes: text,
+                date: new Date().toLocaleDateString('en-IN')
+            }]);
+
+        if (error) {
+            alert('Error sending prescription: ' + error.message);
+            return;
+        }
         
         notes.value = '';
         select.value = '';
@@ -653,13 +656,18 @@
         loadDoctorPrescriptions();
     }
 
-    function loadDoctorPrescriptions() {
+    async function loadDoctorPrescriptions() {
         if(!user) return;
-        const rxs = getPrescriptions().filter(r => r.doctorEmail === user.email);
+        const { data: rxs, error } = await supabase
+            .from('prescriptions')
+            .select('*')
+            .eq('doctor_email', user.email)
+            .order('created_at', { ascending: false });
+
         const container = document.getElementById('doctor-prescriptions-list');
         if(!container) return;
 
-        if(rxs.length === 0) {
+        if(error || !rxs || rxs.length === 0) {
             container.innerHTML = `
                 <div class="panel empty-state" style="padding: 2rem 1rem; border: none; background: transparent; text-align: left;">
                     <i class="fas fa-file-waveform" style="font-size: 2rem;"></i>
@@ -670,17 +678,17 @@
         }
 
         let html = '';
-        rxs.reverse().forEach(rx => {
+        rxs.forEach(rx => {
             html += `
             <div class="a4-prescription" style="margin-top:1rem;">
                 <button onclick="window.print()" style="position:absolute; top:2.5rem; right:3rem; padding:6px 12px; background:var(--blue); color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:0.8rem;" class="print-btn"><i class="fas fa-print"></i> Print</button>
                 <div class="a4-header">
                     <div class="a4-doc-info">
-                        <h2>Dr. ${rx.doctorName}</h2>
+                        <h2>Dr. ${rx.doctor_name}</h2>
                         <p><strong>General Consultant</strong></p>
                         <p>NexCare Health Institute</p>
                         <p>123 Medical Boulevard, Care City, 40001</p>
-                        <p><i class="fas fa-envelope"></i> ${rx.doctorEmail} | <i class="fas fa-phone"></i> +91 98765 43210</p>
+                        <p><i class="fas fa-envelope"></i> ${rx.doctor_email} | <i class="fas fa-phone"></i> +91 98765 43210</p>
                     </div>
                     <div class="a4-clinic-logo">
                         <div class="dot"></div>Nex<span>Care</span>
@@ -689,8 +697,8 @@
                 
                 <div class="a4-meta">
                     <div>
-                        <p>Patient Name: <strong>${rx.patientName}</strong></p>
-                        <p>Patient Email: <strong>${rx.patientEmail}</strong></p>
+                        <p>Patient Name: <strong>${rx.patient_name}</strong></p>
+                        <p>Patient Email: <strong>${rx.patient_email}</strong></p>
                     </div>
                     <div style="text-align: right;">
                         <p>Date: <strong>${rx.date}</strong></p>
@@ -708,7 +716,7 @@
                     </div>
                     <div class="a4-sign">
                         <div class="a4-sign-line"></div>
-                        <p><strong>Dr. ${rx.doctorName}</strong></p>
+                        <p><strong>Dr. ${rx.doctor_name}</strong></p>
                         <p style="font-size: 0.75rem;">Digitally Signed</p>
                     </div>
                 </div>
