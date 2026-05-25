@@ -163,16 +163,14 @@
         .ps-stable{background:rgba(46,204,113,0.12);color:var(--green);}
         .ps-review{background:rgba(230,126,34,0.12);color:var(--orange);}
         .ps-critical{background:rgba(239,68,68,0.12);color:#f87171;}
+        /* Hamburger hidden on desktop */
+        .hamburger-btn{display:none;}
 
         @media(max-width:1200px){
             .stats-grid{grid-template-columns:repeat(2,1fr);}
             .dash-grid{grid-template-columns:1fr;}
         }
         @media(max-width:1024px){
-            .sidebar{width:220px;}
-            .main{margin-left:220px;}
-        }
-        @media(max-width:768px){
             /* Sidebar becomes an off-canvas drawer */
             .sidebar{
                 transform:translateX(-100%);
@@ -207,6 +205,8 @@
             .dash-grid{grid-template-columns:1fr;}
         }
         @media(max-width:540px){
+            .topbar{flex-direction:column;align-items:flex-start;gap:0.8rem;}
+            .topbar-right{width:100%;justify-content:flex-start;}
             .stats-grid{grid-template-columns:1fr 1fr;gap:0.7rem;}
             .stat-val{font-size:1.3rem;}
             .main{padding:0.8rem;}
@@ -218,9 +218,6 @@
             .stats-grid{grid-template-columns:1fr;}
             .main{padding:0.6rem;}
         }
-
-        /* Hamburger hidden on desktop */
-        .hamburger-btn{display:none;}
 
         @media print {
             body * { visibility: hidden; }
@@ -308,6 +305,76 @@
         .empty-state { text-align: center; padding: 4rem 2rem; color: var(--muted); }
         .empty-state i { font-size: 3rem; color: rgba(255,255,255,0.1); margin-bottom: 1rem; }
         .empty-state h3 { color: var(--text); font-size: 1.2rem; margin-bottom: 0.5rem; }
+
+        /* Calendar Styles */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .cal-day {
+            aspect-ratio: 1.1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-sm);
+            font-size: 0.88rem;
+            font-weight: 500;
+            cursor: pointer;
+            position: relative;
+            transition: var(--tr);
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid transparent;
+            color: var(--text);
+        }
+        .cal-day:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        .cal-day.empty {
+            cursor: default;
+            background: transparent !important;
+            border: none !important;
+        }
+        .cal-day.today {
+            border: 1px solid var(--blue);
+            font-weight: 700;
+        }
+        .cal-day.selected {
+            background: var(--blue) !important;
+            color: #fff !important;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+        .cal-dot {
+            position: absolute;
+            bottom: 6px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--green);
+        }
+        .cal-badge {
+            background: var(--green-light);
+            color: var(--green);
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+        .calendar-weekdays div {
+            padding: 8px 0;
+            text-transform: uppercase;
+            font-size: 0.72rem;
+            letter-spacing: 0.05em;
+        }
+        @media(max-width:768px) {
+            .schedule-container {
+                grid-template-columns: 1fr !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -467,11 +534,61 @@
 
     <!-- Other Tabs -->
     <div id="view-schedule" class="tab-pane">
-        <div class="section-hdr"><span class="sec-title">Full Schedule</span></div>
-        <div class="panel empty-state">
-            <i class="fas fa-calendar-alt"></i>
-            <h3>Calendar View</h3>
-            <p>Your full weekly and monthly calendar will appear here.</p>
+        <div class="section-hdr" style="margin-bottom:1.5rem;">
+            <span class="sec-title">Schedule Calendar</span>
+        </div>
+        <div class="schedule-container" style="display:grid; grid-template-columns:380px 1fr; gap:1.5rem; align-items:start;">
+
+            <!-- Left: Calendar Card -->
+            <div class="panel" style="padding:1.4rem;">
+                <!-- Month Header -->
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.2rem;">
+                    <button id="cal-prev" onclick="changeMonth(-1)" style="width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.85rem;transition:var(--tr);" onmouseover="this.style.background='rgba(52,152,219,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div style="text-align:center;">
+                        <div id="cal-month-year" style="font-size:1.1rem; font-weight:700;">May 2026</div>
+                    </div>
+                    <button id="cal-next" onclick="changeMonth(1)" style="width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.85rem;transition:var(--tr);" onmouseover="this.style.background='rgba(52,152,219,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+
+                <!-- Weekday Labels -->
+                <div class="calendar-grid calendar-weekdays" style="color:var(--muted); text-align:center; margin-bottom:4px;">
+                    <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                </div>
+
+                <!-- Day Grid -->
+                <div id="calendar-days" class="calendar-grid" style="text-align:center;">
+                    <!-- Days injected by JS -->
+                </div>
+
+                <!-- Legend -->
+                <div style="display:flex; align-items:center; gap:1.5rem; margin-top:1.2rem; padding-top:1rem; border-top:1px solid var(--border); font-size:0.75rem; color:var(--muted);">
+                    <div style="display:flex;align-items:center;gap:6px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--green);"></div> Has appointments</div>
+                    <div style="display:flex;align-items:center;gap:6px;"><div style="width:16px;height:16px;border-radius:4px;border:1px solid var(--blue);"></div> Today</div>
+                    <div style="display:flex;align-items:center;gap:6px;"><div style="width:16px;height:16px;border-radius:4px;background:var(--blue);"></div> Selected</div>
+                </div>
+            </div>
+
+            <!-- Right: Day Detail Panel -->
+            <div>
+                <div class="panel" style="padding:1.4rem;">
+                    <div id="cal-detail-header" style="margin-bottom:1rem;">
+                        <div style="font-size:0.95rem; font-weight:700; margin-bottom:4px;" id="cal-selected-date-label">Select a date to view appointments</div>
+                        <div id="cal-count-badge" style="display:none;">
+                            <span class="cal-badge" id="cal-count-text">0 Consultations</span>
+                        </div>
+                    </div>
+                    <div id="cal-day-appointments" style="display:flex; flex-direction:column; gap:0.8rem;">
+                        <div style="text-align:center; padding:2rem 0; color:var(--muted); font-size:0.85rem;">
+                            <i class="fas fa-mouse-pointer" style="font-size:1.8rem; opacity:0.2; display:block; margin-bottom:0.6rem;"></i>
+                            Click any date on the calendar
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <div id="view-patients" class="tab-pane">
@@ -614,7 +731,7 @@
         const target = document.getElementById('view-' + tabId);
         if(target) target.classList.add('active');
         // Close sidebar on mobile after tab click
-        if (window.innerWidth <= 768) closeSidebar();
+        if (window.innerWidth <= 1024) closeSidebar();
     }
 
     function toggleSidebar() {
@@ -734,6 +851,166 @@
         document.getElementById('stat-appointments').textContent = todaysAppts;
         document.getElementById('stat-patients').textContent = uniquePatients;
         document.getElementById('stat-earnings').textContent = earningsText;
+    }
+
+    /* =========================================================
+     * INTERACTIVE CALENDAR
+     * ========================================================= */
+    let calendarAppts = [];          // all doctor appointments (cached)
+    let calCurrentDate = new Date(); // month currently displayed
+    let calSelectedDate = null;      // YYYY-MM-DD string of selected day
+
+    const MONTH_NAMES = ['January','February','March','April','May','June',
+                         'July','August','September','October','November','December'];
+
+    function renderCalendar(appts) {
+        if (appts !== undefined) calendarAppts = appts;
+
+        const year  = calCurrentDate.getFullYear();
+        const month = calCurrentDate.getMonth();          // 0-indexed
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        // Build a Set of dates that have appointments (parse 'YYYY-MM-DD @ HH:MM' format)
+        const apptDates = new Set(
+            calendarAppts
+                .filter(a => a.status !== 'Declined' && a.time && a.time.includes(' @ '))
+                .map(a => a.time.split(' @ ')[0].trim())
+        );
+
+        // Update header
+        document.getElementById('cal-month-year').textContent = MONTH_NAMES[month] + ' ' + year;
+
+        const firstDay  = new Date(year, month, 1).getDay();  // 0=Sun
+        const daysInMon = new Date(year, month + 1, 0).getDate();
+
+        let html = '';
+
+        // Leading empty cells
+        for (let i = 0; i < firstDay; i++) {
+            html += '<div class="cal-day empty"></div>';
+        }
+
+        // Day cells
+        for (let d = 1; d <= daysInMon; d++) {
+            const mm   = String(month + 1).padStart(2, '0');
+            const dd   = String(d).padStart(2, '0');
+            const dateStr = `${year}-${mm}-${dd}`;
+
+            let classes = 'cal-day';
+            if (dateStr === todayStr)       classes += ' today';
+            if (dateStr === calSelectedDate) classes += ' selected';
+
+            const dot = apptDates.has(dateStr)
+                ? '<div class="cal-dot"></div>'
+                : '';
+
+            html += `<div class="${classes}" onclick="selectCalendarDay('${dateStr}')">${d}${dot}</div>`;
+        }
+
+        document.getElementById('calendar-days').innerHTML = html;
+
+        // If a date is already selected, refresh the detail panel too
+        if (calSelectedDate) selectCalendarDay(calSelectedDate, true);
+    }
+
+    function changeMonth(dir) {
+        calCurrentDate.setMonth(calCurrentDate.getMonth() + dir);
+        renderCalendar();
+    }
+
+    function selectCalendarDay(dateStr, silent) {
+        calSelectedDate = dateStr;
+        if (!silent) renderCalendar(); // re-render to move the .selected class
+
+        const detailContainer  = document.getElementById('cal-day-appointments');
+        const dateLabel        = document.getElementById('cal-selected-date-label');
+        const countBadge       = document.getElementById('cal-count-badge');
+        const countText        = document.getElementById('cal-count-text');
+
+        // Parse human-readable date
+        const [y, m, d] = dateStr.split('-');
+        const readableDate = new Date(y, m - 1, d)
+            .toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+        dateLabel.textContent = readableDate;
+
+        // Filter appointments for this date
+        const dayAppts = calendarAppts.filter(a => {
+            if (!a.time || !a.time.includes(' @ ')) return false;
+            return a.time.split(' @ ')[0].trim() === dateStr;
+        });
+
+        // Update count badge
+        const count = dayAppts.length;
+        countBadge.style.display = count > 0 ? 'block' : 'none';
+        countText.textContent = count + (count === 1 ? ' Consultation' : ' Consultations');
+
+        if (count === 0) {
+            detailContainer.innerHTML = `
+                <div style="text-align:center; padding:2rem 0; color:var(--muted); font-size:0.85rem;">
+                    <i class="fas fa-calendar-times" style="font-size:1.8rem; opacity:0.2; display:block; margin-bottom:0.6rem;"></i>
+                    No appointments on this day
+                </div>`;
+            return;
+        }
+
+        let html = '';
+        dayAppts.forEach(a => {
+            const timeSlot  = a.time.split(' @ ')[1] || 'N/A';
+            // Compute initials with fallback: prefer stored field, else derive from name
+            const initials  = a.patient_initials
+                || (a.patient_name || 'P').split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase()
+                || 'P';
+            const badgeCls  = a.status === 'Confirmed' ? 'sb-followup'
+                            : a.status === 'Declined'  ? 'sb-urgent'
+                            : 'sb-new';
+            const safeName  = (a.patient_name || '').replace(/'/g, '&#39;');
+            const actions = a.status === 'Pending'
+                ? `<div class="action-btns" style="margin-top:8px;">
+                       <button class="act-btn act-accept" onclick="updateApptAndRefreshCal('${a.id}','Confirmed')">Accept</button>
+                       <button class="act-btn act-decline" onclick="updateApptAndRefreshCal('${a.id}','Declined')">Decline</button>
+                   </div>`
+                : a.status === 'Confirmed'
+                ? `<div class="action-btns" style="margin-top:8px;">
+                       <button class="act-btn act-accept" onclick="alert('Starting consultation with ${safeName}...')">Start</button>
+                   </div>`
+                : '';
+
+            html += `
+            <div class="sched-card" style="flex-direction:column; align-items:flex-start; gap:0.5rem;">
+                <div style="display:flex; align-items:center; gap:0.8rem; width:100%;">
+                    <div class="pat-avatar" style="background:linear-gradient(135deg,#3498db,#2471a3); width:38px; height:38px; flex-shrink:0; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.8rem;">${initials}</div>
+                    <div style="flex:1;">
+                        <div class="sched-name">${a.patient_name}</div>
+                        <div class="sched-reason"><i class="fas fa-clock" style="color:var(--muted); font-size:0.72rem;"></i> ${timeSlot}</div>
+                    </div>
+                    <span class="sched-badge ${badgeCls}">${a.status}</span>
+                </div>
+                ${actions}
+            </div>`;
+        });
+
+        detailContainer.innerHTML = html;
+    }
+
+    async function updateApptAndRefreshCal(id, newStatus) {
+        const { error } = await supabase
+            .from('appointments')
+            .update({ status: newStatus })
+            .eq('id', id);
+
+        if (!error) {
+            // Reload all appointments, update dashboard list AND calendar
+            const { data: appts } = await supabase
+                .from('appointments')
+                .select('*')
+                .eq('doctor_email', user.email);
+
+            if (appts) {
+                renderCalendar(appts);
+                updateStats(appts);
+                loadDoctorAppointments();
+            }
+        }
     }
 
     async function populatePrescriptionForm() {
@@ -912,7 +1189,14 @@
     }
 
     if (user) {
-        loadDoctorAppointments();
+        loadDoctorAppointments().then(async () => {
+            // Load all appointments for the calendar
+            const { data: allAppts } = await supabase
+                .from('appointments')
+                .select('*')
+                .eq('doctor_email', user.email);
+            renderCalendar(allAppts || []);
+        });
         populatePrescriptionForm();
         loadDoctorPrescriptions();
         loadProfile();

@@ -1068,3 +1068,117 @@ body.dark-mode .pd-btn-logout {
     color: #f87171;
 }
 
+/* =========================================================
+ * INTERACTIVE CALENDAR STYLES (doctor-dashboard)
+ * ========================================================= */
+
+/* 7-column grid shared by weekday labels and day cells */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.calendar-weekdays > div {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 4px 0;
+}
+
+/* Individual day cell */
+.cal-day {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 32px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s, transform 0.12s;
+    user-select: none;
+    border: 1px solid transparent;
+}
+.cal-day:not(.empty):hover {
+    background: rgba(52,152,219,0.12);
+    transform: scale(1.08);
+}
+.cal-day.empty {
+    cursor: default;
+    pointer-events: none;
+}
+.cal-day.today {
+    border-color: var(--primary-blue, #3498db);
+    font-weight: 700;
+    color: var(--primary-blue, #3498db);
+}
+.cal-day.selected {
+    background: var(--primary-blue, #3498db);
+    color: #fff !important;
+    border-color: var(--primary-blue, #3498db);
+    font-weight: 700;
+}
+.cal-day.selected .cal-dot {
+    background: rgba(255,255,255,0.9);
+}
+
+/* Green dot indicator for days with appointments */
+.cal-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #2ecc71;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+/* Count badge shown in the detail panel */
+.cal-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    background: rgba(52,152,219,0.15);
+    color: #3498db;
+    letter-spacing: 0.03em;
+}
+
+/* Responsive: stack calendar + detail panel on mobile */
+@media (max-width: 768px) {
+    .schedule-container {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* =========================================================
+ * PATIENT DASHBOARD – DATE PICKER (book appointment)
+ * ========================================================= */
+.date-input-wrapper {
+    position: relative;
+}
+.date-input-wrapper input[type="date"] {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color, rgba(255,255,255,0.1));
+    background: rgba(255,255,255,0.04);
+    color: inherit;
+    font-size: 0.9rem;
+    font-family: inherit;
+    outline: none;
+    transition: border 0.2s, box-shadow 0.2s;
+}
+.date-input-wrapper input[type="date"]:focus {
+    border-color: var(--primary-blue, #3498db);
+    box-shadow: 0 0 0 3px rgba(52,152,219,0.18);
+}
+.date-input-wrapper input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.6);
+    cursor: pointer;
+}
