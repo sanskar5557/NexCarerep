@@ -5,6 +5,7 @@ create table profiles (
   last_name text,
   email text,
   phone text,
+  speciality text,
   role text check (role in ('Patient', 'Doctor')),
   joined text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null

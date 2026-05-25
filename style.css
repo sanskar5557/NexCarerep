@@ -62,7 +62,15 @@ body.dark-mode .mock-chart {
     padding: 0;
     box-sizing: border-box;
     font-family: 'Poppins', 'Inter', sans-serif;
+    /* Hide scrollbars globally but keep scrolling active */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
+
+*::-webkit-scrollbar {
+    display: none;
+}
+
 
 body {
     background-color: var(--bg-soft-white);
@@ -526,18 +534,149 @@ body.dark-mode .iphone-frame {
     gap: 1rem;
 }
 
-/* Responsive Design */
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Large tablets / small laptops */
 @media (max-width: 1024px) {
+    .slide { padding: 7rem 3rem 3rem; }
+    .top-nav { padding: 1rem 3rem; }
+    h1 { font-size: 2.8rem; }
+    h2 { font-size: 2rem; }
+    .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .nav-dots { right: 1.5rem; }
+    .iphone-frame { width: 240px; height: 480px; }
+}
+
+/* Tablets */
+@media (max-width: 768px) {
+    body { overflow-y: auto; }
+
+    .deck-container {
+        scroll-snap-type: none;
+        height: auto;
+    }
+
     .slide {
-        padding: 4rem 4rem;
+        height: auto;
+        min-height: 100svh;
+        padding: 6rem 1.5rem 3rem;
+        scroll-snap-align: none;
     }
-    
-    .top-nav {
-        padding: 1rem 4rem;
+
+    .top-nav { padding: 1rem 1.5rem; }
+
+    .mobile-menu-toggle { display: block; }
+
+    .nav-links {
+        position: fixed;
+        top: 0; right: -100%;
+        width: 80%; height: 100vh;
+        background: var(--bg-white);
+        flex-direction: column;
+        justify-content: center;
+        gap: 2.5rem;
+        transition: 0.4s ease-in-out;
+        box-shadow: -10px 0 30px rgba(0,0,0,0.12);
+        z-index: 1001;
+        padding: 2rem;
     }
-    
-    h1 { font-size: 3rem; }
-    h2 { font-size: 2.2rem; }
+    .nav-links.active { right: 0; }
+
+    .nav-dots { display: none; }
+
+    .grid-2, .grid-3, .grid-4 {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .step-line { display: none; }
+    .step-item { margin-bottom: 2rem; }
+
+    h1 { font-size: 2.2rem; }
+    h2 {
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        display: block;
+        width: 100%;
+    }
+    h2::after { left: 50%; transform: translateX(-50%); }
+
+    p { font-size: 1rem; }
+
+    .slide { text-align: center; }
+    .card { text-align: center; padding: 1.5rem; }
+    .feature-item { text-align: center; display: flex; flex-direction: column; align-items: center; }
+    .icon-box { margin-left: auto; margin-right: auto; }
+
+    #slide-cover .content {
+        flex-direction: column;
+        text-align: center;
+        gap: 2rem;
+    }
+
+    .iphone-frame { width: 220px; height: 440px; margin: 0 auto; }
+    .iphone-frame.small { width: 160px; height: 320px; }
+
+    .solution-card {
+        border-left: none !important;
+        border-top: 5px solid var(--primary-green);
+    }
+    .solution-card:first-child { border-top-color: #e74c3c; }
+    .solution-card ul { list-style: none; padding: 0; }
+    .solution-card li { margin-bottom: 0.5rem; }
+
+    .flow-arrow { transform: rotate(90deg); margin: 1rem 0; }
+
+    .comparison-table { display: block; overflow-x: auto; }
+
+    .roadmap-line {
+        flex-direction: column;
+        gap: 3rem;
+        margin-top: 2rem;
+    }
+    .roadmap-line::after { left: 20px; top: 0; bottom: 0; width: 3px; height: 100%; }
+    .roadmap-point { text-align: center; padding-left: 0; padding-top: 60px; }
+    .point-circle { position: absolute; left: 50%; top: 0; transform: translateX(-50%); margin: 0; }
+
+    .stat-value { font-size: 3.5rem; }
+    .stat-value.green { font-size: 3rem; }
+
+    .flex-center { flex-direction: column; }
+
+    /* Profile dropdown full-width on mobile */
+    .profile-dropdown { width: 260px; right: -1rem; }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+    .slide { padding: 5.5rem 1.2rem 2.5rem; }
+    h1 { font-size: 1.9rem; }
+    h2 { font-size: 1.6rem; }
+    p { font-size: 0.95rem; }
+
+    .btn { width: 100%; padding: 1rem; font-size: 1rem; }
+    .btn-sm { width: auto; }
+
+    .iphone-frame { width: 190px; height: 380px; }
+    .iphone-frame.small { width: 140px; height: 280px; }
+
+    .top-nav { padding: 0.8rem 1rem; }
+    .logo-text { font-size: 1.4rem; }
+
+    .card { padding: 1.2rem; }
+    .stat-value { font-size: 3rem; }
+
+    .nav-links { width: 90%; }
+
+    .profile-dropdown { width: calc(100vw - 2rem); right: -0.5rem; }
+}
+
+/* Very small phones */
+@media (max-width: 360px) {
+    h1 { font-size: 1.7rem; }
+    h2 { font-size: 1.4rem; }
+    .slide { padding: 5rem 1rem 2rem; }
 }
 
 @media (max-width: 768px) {

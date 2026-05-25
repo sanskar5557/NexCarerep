@@ -16,7 +16,9 @@
             --radius: 16px; --radius-sm: 10px;
             --transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
         }
-        * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif;
+            scrollbar-width: none; -ms-overflow-style: none; }
+        *::-webkit-scrollbar { display: none; }
         body { background: var(--dark); color: var(--text); min-height:100vh; display:flex; }
 
         /* Sidebar */
@@ -221,15 +223,64 @@
         }
         .search-bar input::placeholder { color:var(--muted); }
 
-        /* Responsive */
+        /* ===== RESPONSIVE ===== */
+        @media(max-width:1200px){
+            .stats-grid{grid-template-columns:repeat(2,1fr);}
+            .dash-grid{grid-template-columns:1fr;}
+        }
         @media(max-width:1024px){
-            .stats-grid { grid-template-columns:repeat(2,1fr); }
-            .dash-grid { grid-template-columns:1fr; }
+            .sidebar{width:220px;}
+            .main{margin-left:220px;}
         }
         @media(max-width:768px){
-            .sidebar { width:200px; }
-            .main { margin-left:200px; }
+            .sidebar{
+                transform:translateX(-100%);
+                transition:transform 0.3s ease;
+                z-index:200;
+                width:260px;
+            }
+            .sidebar.open{transform:translateX(0);}
+            .main{margin-left:0; padding:1rem;}
+            .sidebar-overlay{
+                display:none;
+                position:fixed;inset:0;
+                background:rgba(0,0,0,0.5);
+                z-index:199;
+                backdrop-filter:blur(2px);
+            }
+            .sidebar-overlay.active{display:block;}
+            .hamburger-btn{
+                display:flex;
+                position:fixed;top:1rem;left:1rem;
+                z-index:300;
+                width:40px;height:40px;
+                background:var(--card);
+                border:1px solid var(--border);
+                border-radius:var(--radius-sm);
+                align-items:center;justify-content:center;
+                cursor:pointer;color:var(--text);
+                font-size:1rem;
+            }
+            .topbar{padding-top:3.5rem;}
+            .stats-grid{grid-template-columns:repeat(2,1fr);gap:0.8rem;}
+            .dash-grid{grid-template-columns:1fr;}
+            .quick-book-grid{grid-template-columns:repeat(3,1fr);}
         }
+        @media(max-width:540px){
+            .stats-grid{grid-template-columns:1fr 1fr;gap:0.7rem;}
+            .stat-val{font-size:1.3rem;}
+            .main{padding:0.8rem;}
+            .topbar-greeting h2{font-size:1.2rem;}
+            .quick-book-grid{grid-template-columns:repeat(2,1fr);}
+            .appt-card{flex-wrap:wrap;gap:0.6rem;}
+        }
+        @media(max-width:380px){
+            .stats-grid{grid-template-columns:1fr;}
+            .main{padding:0.6rem;}
+            .quick-book-grid{grid-template-columns:1fr 1fr;}
+        }
+        /* Hamburger hidden on desktop */
+        .hamburger-btn{display:none;}
 
         /* A4 Prescription Template */
         .a4-prescription {
@@ -314,6 +365,13 @@
     </style>
 </head>
 <body>
+
+<!-- Hamburger button (mobile) -->
+<button class="hamburger-btn" id="hamburger-btn" onclick="toggleSidebar()" aria-label="Open menu">
+    <i class="fas fa-bars"></i>
+</button>
+<!-- Sidebar overlay -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
 <!-- Sidebar -->
 <aside class="sidebar">
@@ -501,11 +559,25 @@
         </div>
     </div>
     <div id="view-settings" class="tab-pane">
-        <div class="section-header"><span class="section-title">Account Settings</span></div>
-        <div class="panel-card empty-state">
-            <i class="fas fa-sliders"></i>
-            <h3>Profile Preferences</h3>
-            <p>Update your personal information, security settings, and notification preferences.</p>
+        <div class="section-header"><span class="section-title">Profile Settings</span></div>
+        <div class="panel-card" style="max-width: 600px;">
+            <form id="patient-profile-form" onsubmit="saveProfile(event)">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+                    <div>
+                        <label style="font-size:0.85rem; color:var(--muted); margin-bottom:5px; display:block;">First Name</label>
+                        <input type="text" id="prof-fname" required style="width:100%; padding:0.8rem; background:var(--card); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); outline:none;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.85rem; color:var(--muted); margin-bottom:5px; display:block;">Last Name</label>
+                        <input type="text" id="prof-lname" required style="width:100%; padding:0.8rem; background:var(--card); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); outline:none;">
+                    </div>
+                </div>
+                <div style="margin-bottom:1.5rem;">
+                    <label style="font-size:0.85rem; color:var(--muted); margin-bottom:5px; display:block;">Phone Number</label>
+                    <input type="tel" id="prof-phone" required style="width:100%; padding:0.8rem; background:var(--card); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); outline:none;">
+                </div>
+                <button type="submit" id="prof-save-btn" style="padding:0.8rem 1.5rem; background:var(--blue); color:#fff; border:none; border-radius:var(--radius-sm); font-weight:600; cursor:pointer; width:100%; transition:0.3s;">Save Profile Changes</button>
+            </form>
         </div>
     </div>
 </main>
@@ -546,6 +618,20 @@
         document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
         const target = document.getElementById('view-' + tabId);
         if(target) target.classList.add('active');
+        // Close sidebar on mobile after tab click
+        if (window.innerWidth <= 768) closeSidebar();
+    }
+
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('active');
+    }
+
+    function closeSidebar() {
+        document.querySelector('.sidebar').classList.remove('open');
+        document.getElementById('sidebar-overlay').classList.remove('active');
     }
     async function bookAppointment(docEmail, docName) {
         const newAppt = {
@@ -722,11 +808,57 @@
         container.innerHTML = html;
     }
 
+    async function loadProfile() {
+        if (!user) return;
+        const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+        if (data) {
+            document.getElementById('prof-fname').value = data.first_name || '';
+            document.getElementById('prof-lname').value = data.last_name || '';
+            document.getElementById('prof-phone').value = data.phone || '';
+        }
+    }
+
+    async function saveProfile(e) {
+        e.preventDefault();
+        if (!user) return;
+        const btn = document.getElementById('prof-save-btn');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        btn.disabled = true;
+
+        const updates = {
+            first_name: document.getElementById('prof-fname').value.trim(),
+            last_name: document.getElementById('prof-lname').value.trim(),
+            phone: document.getElementById('prof-phone').value.trim()
+        };
+
+        const { error } = await supabase.from('profiles').update(updates).eq('id', user.id);
+        
+        btn.disabled = false;
+        if (error) {
+            btn.innerHTML = 'Save Profile Changes';
+            alert('Error updating profile: ' + error.message);
+        } else {
+            btn.innerHTML = '<i class="fas fa-check"></i> Saved!';
+            btn.style.background = 'var(--green)';
+            
+            user.firstName = updates.first_name;
+            user.lastName = updates.last_name;
+            localStorage.setItem('nexcare_user', JSON.stringify(user));
+            
+            setTimeout(() => {
+                btn.innerHTML = 'Save Profile Changes';
+                btn.style.background = 'var(--blue)';
+                window.location.reload();
+            }, 1000);
+        }
+    }
+
     // Call it when the page loads
     if (user) {
         loadRegisteredDoctors();
         loadPatientAppointments();
         loadPatientPrescriptions();
+        loadProfile();
     }
 </script>
 </body>

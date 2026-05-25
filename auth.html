@@ -29,7 +29,9 @@
             --transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', 'Inter', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', 'Inter', sans-serif;
+            scrollbar-width: none; -ms-overflow-style: none; }
+        *::-webkit-scrollbar { display: none; }
 
         body {
             min-height: 100vh;
@@ -462,21 +464,42 @@
             margin-top: 4px;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1100px) {
+            .auth-wrapper { max-width: 900px; gap: 1.5rem; }
+            .auth-card { padding: 2rem; }
+        }
+
+        @media (max-width: 900px) {
             .auth-wrapper {
                 grid-template-columns: 1fr;
-                max-width: 480px;
+                max-width: 500px;
+                margin-top: 5.5rem;
             }
             .auth-divider { display: none; }
             .auth-nav { padding: 1rem 1.5rem; }
-            .name-row { grid-template-columns: 1fr; }
+            .name-row { grid-template-columns: 1fr 1fr; }
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 600px) {
+            body { padding: 1rem 0.75rem; }
+            .auth-wrapper { margin-top: 5rem; max-width: 100%; }
             .auth-card { padding: 1.8rem 1.4rem; }
-            .card-title { font-size: 1.5rem; }
+            .card-title { font-size: 1.6rem; }
+            .name-row { grid-template-columns: 1fr; }
             .social-row { grid-template-columns: 1fr; }
+            .role-selector { gap: 0.5rem; }
+            .role-label { padding: 0.7rem 0.5rem; font-size: 0.78rem; }
+        }
+
+        @media (max-width: 400px) {
+            .auth-card { padding: 1.4rem 1rem; }
+            .card-title { font-size: 1.4rem; }
+            .card-subtitle { font-size: 0.82rem; }
+            .form-input { font-size: 0.85rem; }
+            .btn-submit { font-size: 0.92rem; padding: 0.8rem; }
+            .auth-nav { padding: 0.8rem 1rem; }
+            .logo-text { font-size: 1.3rem; }
         }
 
         /* Auth messages */
@@ -598,14 +621,37 @@
                 <div class="form-group">
                     <label class="form-label">I am a...</label>
                     <div class="role-selector">
-                        <input type="radio" name="role" id="role-patient" class="role-option" value="patient" checked>
+                        <input type="radio" name="role" id="role-patient" class="role-option" value="patient" checked onchange="toggleSpeciality()">
                         <label class="role-label" for="role-patient">
                             <i class="fas fa-user-injured"></i> Patient
                         </label>
-                        <input type="radio" name="role" id="role-doctor" class="role-option" value="doctor">
+                        <input type="radio" name="role" id="role-doctor" class="role-option" value="doctor" onchange="toggleSpeciality()">
                         <label class="role-label" for="role-doctor">
                             <i class="fas fa-user-doctor"></i> Doctor
                         </label>
+                    </div>
+                </div>
+
+                <!-- Speciality (Doctor only) -->
+                <div class="form-group" id="speciality-group" style="display:none;">
+                    <label class="form-label" for="signup-speciality">Medical Speciality</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-stethoscope input-icon"></i>
+                        <select id="signup-speciality" class="form-input" style="padding-left:2.5rem; cursor:pointer;">
+                            <option value="">Select your speciality...</option>
+                            <option value="General Physician">General Physician</option>
+                            <option value="Cardiologist">Cardiologist</option>
+                            <option value="Dermatologist">Dermatologist</option>
+                            <option value="Neurologist">Neurologist</option>
+                            <option value="Pediatrician">Pediatrician</option>
+                            <option value="Orthopedist">Orthopedist</option>
+                            <option value="Psychiatrist">Psychiatrist</option>
+                            <option value="Dentist">Dentist</option>
+                            <option value="Ophthalmologist">Ophthalmologist</option>
+                            <option value="ENT Specialist">ENT Specialist</option>
+                            <option value="Gynecologist">Gynecologist</option>
+                            <option value="Oncologist">Oncologist</option>
+                        </select>
                     </div>
                 </div>
 
@@ -765,6 +811,21 @@
             setTimeout(() => { window.location.href = dest; }, 900);
         }
 
+        // Show/hide speciality based on role
+        function toggleSpeciality() {
+            const isDoctor = document.getElementById('role-doctor').checked;
+            const group = document.getElementById('speciality-group');
+            const select = document.getElementById('signup-speciality');
+            group.style.display = isDoctor ? 'block' : 'none';
+            // Animate in
+            if (isDoctor) {
+                group.style.opacity = '0';
+                group.style.transform = 'translateY(-8px)';
+                group.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                setTimeout(() => { group.style.opacity = '1'; group.style.transform = 'translateY(0)'; }, 10);
+            }
+        }
+
         // ---- SIGN UP ----
         async function handleSignup(e) {
             e.preventDefault();
@@ -785,6 +846,17 @@
                 const firstName = document.getElementById('signup-fname').value.trim();
                 const lastName = document.getElementById('signup-lname').value.trim();
                 const phone = document.getElementById('signup-phone').value.trim();
+
+                // Validate speciality for doctors
+                let speciality = null;
+                if (role === 'Doctor') {
+                    speciality = document.getElementById('signup-speciality').value;
+                    if (!speciality) {
+                        showMsg('signup-msg', 'error', 'Please select your medical speciality.');
+                        document.getElementById('signup-speciality').focus();
+                        return;
+                    }
+                }
 
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
                 btn.disabled  = true;
@@ -817,19 +889,20 @@
 
                 // If email confirmations are enabled, the user isn't logged in yet, so RLS might block this insert.
                 // We'll try to insert, but if it fails with RLS, we'll just tell them to check their email.
+                const profileData = {
+                    id: data.user.id,
+                    first_name: firstName,
+                    last_name: lastName,
+                    email: email,
+                    phone: phone,
+                    role: role,
+                    joined: new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})
+                };
+                if (speciality) profileData.speciality = speciality;
+
                 const { error: profileError } = await supabase
                     .from('profiles')
-                    .insert([
-                        {
-                            id: data.user.id,
-                            first_name: firstName,
-                            last_name: lastName,
-                            email: email,
-                            phone: phone,
-                            role: role,
-                            joined: new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})
-                        }
-                    ]);
+                    .insert([profileData]);
 
                 if (profileError) {
                     // Check if it's an RLS error (which happens if email confirmation is turned on and they aren't logged in)
@@ -856,7 +929,8 @@
                     firstName: firstName,
                     lastName: lastName,
                     phone: phone,
-                    role: role
+                    role: role,
+                    speciality: speciality
                 };
                 localStorage.setItem('nexcare_user', JSON.stringify(sessionUser));
                 localStorage.setItem('nexcare_logged_in', 'true');

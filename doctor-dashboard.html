@@ -17,7 +17,9 @@
             --radius:16px; --radius-sm:10px;
             --tr:all 0.3s cubic-bezier(0.4,0,0.2,1);
         }
-        *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;
+            scrollbar-width: none; -ms-overflow-style: none;}
+        *::-webkit-scrollbar { display: none; }
         body{background:var(--dark);color:var(--text);min-height:100vh;display:flex;}
 
         /* ── Sidebar ── */
@@ -162,9 +164,71 @@
         .ps-review{background:rgba(230,126,34,0.12);color:var(--orange);}
         .ps-critical{background:rgba(239,68,68,0.12);color:#f87171;}
 
-        @media(max-width:1100px){.stats-grid{grid-template-columns:repeat(2,1fr);}
-            .dash-grid{grid-template-columns:1fr;}}
-        @media(max-width:768px){.sidebar{width:200px;}.main{margin-left:200px;}}
+        @media(max-width:1200px){
+            .stats-grid{grid-template-columns:repeat(2,1fr);}
+            .dash-grid{grid-template-columns:1fr;}
+        }
+        @media(max-width:1024px){
+            .sidebar{width:220px;}
+            .main{margin-left:220px;}
+        }
+        @media(max-width:768px){
+            /* Sidebar becomes an off-canvas drawer */
+            .sidebar{
+                transform:translateX(-100%);
+                transition:transform 0.3s ease;
+                z-index:200;
+                width:260px;
+            }
+            .sidebar.open{transform:translateX(0);}
+            .main{margin-left:0; padding:1rem;}
+            .sidebar-overlay{
+                display:none;
+                position:fixed;inset:0;
+                background:rgba(0,0,0,0.5);
+                z-index:199;
+                backdrop-filter:blur(2px);
+            }
+            .sidebar-overlay.active{display:block;}
+            .hamburger-btn{
+                display:flex;
+                position:fixed;top:1rem;left:1rem;
+                z-index:300;
+                width:40px;height:40px;
+                background:var(--card);
+                border:1px solid var(--border);
+                border-radius:var(--radius-sm);
+                align-items:center;justify-content:center;
+                cursor:pointer;color:var(--text);
+                font-size:1rem;
+            }
+            .topbar{margin-top:0; padding-top:3rem;}
+            .stats-grid{grid-template-columns:repeat(2,1fr);gap:0.8rem;}
+            .dash-grid{grid-template-columns:1fr;}
+        }
+        @media(max-width:540px){
+            .stats-grid{grid-template-columns:1fr 1fr;gap:0.7rem;}
+            .stat-val{font-size:1.3rem;}
+            .main{padding:0.8rem;}
+            .topbar h2{font-size:1.2rem;}
+            .sched-card{flex-wrap:wrap;gap:0.6rem;}
+            .action-btns{width:100%;justify-content:flex-end;}
+        }
+        @media(max-width:380px){
+            .stats-grid{grid-template-columns:1fr;}
+            .main{padding:0.6rem;}
+        }
+
+        /* Hamburger hidden on desktop */
+        .hamburger-btn{display:none;}
+
+        @media print {
+            body * { visibility: hidden; }
+            .a4-prescription, .a4-prescription * { visibility: visible; }
+            .a4-prescription { position: absolute; left: 0; top: 0; box-shadow: none; width: 100%; max-width: 100%; }
+            .sidebar, .topbar { display: none !important; }
+            .main { margin-left: 0 !important; padding: 0 !important; }
+        }
 
         /* A4 Prescription Template */
         .a4-prescription {
@@ -248,6 +312,13 @@
 </head>
 <body>
 
+<!-- Hamburger button (mobile) -->
+<button class="hamburger-btn" id="hamburger-btn" onclick="toggleSidebar()" aria-label="Open menu">
+    <i class="fas fa-bars"></i>
+</button>
+<!-- Sidebar overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
 <!-- Sidebar -->
 <aside class="sidebar">
     <div class="sb-logo">
@@ -303,19 +374,19 @@
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-icon si-blue"><i class="fas fa-calendar-check"></i></div>
-            <div><div class="stat-val">8</div><div class="stat-label">Today's Appointments</div></div>
+            <div><div class="stat-val" id="stat-appointments">0</div><div class="stat-label">Today's Appointments</div></div>
         </div>
         <div class="stat-card">
             <div class="stat-icon si-green"><i class="fas fa-users"></i></div>
-            <div><div class="stat-val">124</div><div class="stat-label">Total Patients</div></div>
+            <div><div class="stat-val" id="stat-patients">0</div><div class="stat-label">Total Patients</div></div>
         </div>
         <div class="stat-card">
             <div class="stat-icon si-purple"><i class="fas fa-star"></i></div>
-            <div><div class="stat-val">4.9</div><div class="stat-label">Avg Rating</div></div>
+            <div><div class="stat-val" id="stat-rating">4.9</div><div class="stat-label">Avg Rating</div></div>
         </div>
         <div class="stat-card">
             <div class="stat-icon si-orange"><i class="fas fa-indian-rupee-sign"></i></div>
-            <div><div class="stat-val">₹38K</div><div class="stat-label">This Month</div></div>
+            <div><div class="stat-val" id="stat-earnings">₹0</div><div class="stat-label">This Month</div></div>
         </div>
     </div>
 
@@ -459,11 +530,39 @@
         </div>
     </div>
     <div id="view-settings" class="tab-pane">
-        <div class="section-hdr"><span class="sec-title">Dashboard Settings</span></div>
-        <div class="panel empty-state">
-            <i class="fas fa-sliders"></i>
-            <h3>Clinic & Profile Info</h3>
-            <p>Update your availability, consultation fees, and professional details.</p>
+        <div class="section-hdr"><span class="sec-title">Profile Settings</span></div>
+        <div class="panel" style="max-width: 600px;">
+            <form id="doctor-profile-form" onsubmit="saveProfile(event)">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+                    <div>
+                        <label style="font-size:0.85rem; color:var(--muted); margin-bottom:5px; display:block;">First Name</label>
+                        <input type="text" id="prof-fname" required style="width:100%; padding:0.8rem; background:var(--card); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); outline:none;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.85rem; color:var(--muted); margin-bottom:5px; display:block;">Last Name</label>
+                        <input type="text" id="prof-lname" required style="width:100%; padding:0.8rem; background:var(--card); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); outline:none;">
+                    </div>
+                </div>
+                <div style="margin-bottom:1rem;">
+                    <label style="font-size:0.85rem; color:var(--muted); margin-bottom:5px; display:block;">Phone Number</label>
+                    <input type="tel" id="prof-phone" required style="width:100%; padding:0.8rem; background:var(--card); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); outline:none;">
+                </div>
+                <div style="margin-bottom:1.5rem;">
+                    <label style="font-size:0.85rem; color:var(--muted); margin-bottom:5px; display:block;">Speciality</label>
+                    <select id="prof-speciality" required style="width:100%; padding:0.8rem; background:var(--card); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); outline:none;">
+                        <option value="">Select Speciality...</option>
+                        <option value="General Physician">General Physician</option>
+                        <option value="Cardiologist">Cardiologist</option>
+                        <option value="Dermatologist">Dermatologist</option>
+                        <option value="Neurologist">Neurologist</option>
+                        <option value="Pediatrician">Pediatrician</option>
+                        <option value="Orthopedist">Orthopedist</option>
+                        <option value="Psychiatrist">Psychiatrist</option>
+                        <option value="Dentist">Dentist</option>
+                    </select>
+                </div>
+                <button type="submit" id="prof-save-btn" style="padding:0.8rem 1.5rem; background:var(--blue); color:#fff; border:none; border-radius:var(--radius-sm); font-weight:600; cursor:pointer; width:100%; transition:0.3s;">Save Profile Changes</button>
+            </form>
         </div>
     </div>
 
@@ -514,6 +613,20 @@
         document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
         const target = document.getElementById('view-' + tabId);
         if(target) target.classList.add('active');
+        // Close sidebar on mobile after tab click
+        if (window.innerWidth <= 768) closeSidebar();
+    }
+
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('active');
+    }
+
+    function closeSidebar() {
+        document.querySelector('.sidebar').classList.remove('open');
+        document.getElementById('sidebar-overlay').classList.remove('active');
     }
 
     async function updateAppointmentStatus(id, newStatus) {
@@ -597,6 +710,30 @@
             });
             requestsList.innerHTML = html;
         }
+
+        // Also update the stats since we just loaded appointments
+        updateStats(appts);
+    }
+
+    function updateStats(appts) {
+        // Today's Appointments (created today, not declined)
+        const todayStr = new Date().toISOString().split('T')[0];
+        const todaysAppts = appts.filter(a => a.created_at.startsWith(todayStr) && a.status !== 'Declined').length;
+        
+        // Total Patients (unique patient emails)
+        const uniquePatients = new Set(appts.map(a => a.patient_email)).size;
+        
+        // Earnings: let's assume each confirmed appointment is ₹500
+        const confirmedCount = appts.filter(a => a.status === 'Confirmed').length;
+        const earnings = confirmedCount * 500;
+        let earningsText = '₹' + earnings;
+        if (earnings >= 1000) {
+            earningsText = '₹' + (earnings / 1000).toFixed(1).replace('.0', '') + 'K';
+        }
+
+        document.getElementById('stat-appointments').textContent = todaysAppts;
+        document.getElementById('stat-patients').textContent = uniquePatients;
+        document.getElementById('stat-earnings').textContent = earningsText;
     }
 
     async function populatePrescriptionForm() {
@@ -725,10 +862,60 @@
         container.innerHTML = html;
     }
 
+    async function loadProfile() {
+        if (!user) return;
+        const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+        if (data) {
+            document.getElementById('prof-fname').value = data.first_name || '';
+            document.getElementById('prof-lname').value = data.last_name || '';
+            document.getElementById('prof-phone').value = data.phone || '';
+            if(data.speciality) {
+                document.getElementById('prof-speciality').value = data.speciality;
+            }
+        }
+    }
+
+    async function saveProfile(e) {
+        e.preventDefault();
+        if (!user) return;
+        const btn = document.getElementById('prof-save-btn');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        btn.disabled = true;
+
+        const updates = {
+            first_name: document.getElementById('prof-fname').value.trim(),
+            last_name: document.getElementById('prof-lname').value.trim(),
+            phone: document.getElementById('prof-phone').value.trim(),
+            speciality: document.getElementById('prof-speciality').value
+        };
+
+        const { error } = await supabase.from('profiles').update(updates).eq('id', user.id);
+        
+        btn.disabled = false;
+        if (error) {
+            btn.innerHTML = 'Save Profile Changes';
+            alert('Error updating profile: ' + error.message);
+        } else {
+            btn.innerHTML = '<i class="fas fa-check"></i> Saved!';
+            btn.style.background = 'var(--green)';
+            
+            user.firstName = updates.first_name;
+            user.lastName = updates.last_name;
+            localStorage.setItem('nexcare_user', JSON.stringify(user));
+            
+            setTimeout(() => {
+                btn.innerHTML = 'Save Profile Changes';
+                btn.style.background = 'var(--blue)';
+                window.location.reload();
+            }, 1000);
+        }
+    }
+
     if (user) {
         loadDoctorAppointments();
         populatePrescriptionForm();
         loadDoctorPrescriptions();
+        loadProfile();
     }
 </script>
 </body>
