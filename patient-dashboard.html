@@ -946,21 +946,21 @@
                 <div class="stat-card">
                     <div class="stat-icon blue"><i class="fas fa-calendar-check"></i></div>
                     <div>
-                        <div class="stat-val">3</div>
+                        <div class="stat-val" id="stat-upcoming">0</div>
                         <div class="stat-label">Upcoming Appts</div>
                     </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon green"><i class="fas fa-user-doctor"></i></div>
                     <div>
-                        <div class="stat-val">2</div>
+                        <div class="stat-val" id="stat-doctors">0</div>
                         <div class="stat-label">Doctors Consulted</div>
                     </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon purple"><i class="fas fa-file-medical"></i></div>
                     <div>
-                        <div class="stat-val">7</div>
+                        <div class="stat-val" id="stat-reports">0</div>
                         <div class="stat-label">Health Reports</div>
                     </div>
                 </div>
@@ -976,8 +976,7 @@
             <!-- Search Doctors -->
             <div class="search-bar">
                 <i class="fas fa-search"></i>
-                <input type="text" placeholder="Search for doctors, specializations..."
-                    onkeypress="if(event.key === 'Enter') alert('Search functionality coming soon!')">
+                <input type="text" id="doctor-search" placeholder="Search for doctors, specializations..." oninput="filterDoctors(this.value)">
             </div>
 
             <!-- Main grid -->
@@ -1285,6 +1284,40 @@
             loadPatientAppointments();
         }
 
+        let patientAppts = [];
+        let patientPrescriptions = [];
+        let allRegisteredDoctors = [];
+
+        function updatePatientStats(appts, prescriptions) {
+            const localDate = new Date();
+            const year = localDate.getFullYear();
+            const month = String(localDate.getMonth() + 1).padStart(2, '0');
+            const day = String(localDate.getDate()).padStart(2, '0');
+            const todayStr = `${year}-${month}-${day}`;
+
+            // 1. Upcoming appointments: Confirmed or Pending and scheduled for today or later
+            const upcomingAppts = appts.filter(a => {
+                if (a.status === 'Declined') return false;
+                if (!a.time) return false;
+                const scheduledDate = a.time.split(' @ ')[0].trim();
+                return scheduledDate >= todayStr;
+            }).length;
+
+            // 2. Doctors Consulted: unique doctor emails where status is Confirmed
+            const uniqueDoctors = new Set(
+                appts
+                    .filter(a => a.status === 'Confirmed')
+                    .map(a => a.doctor_email)
+            ).size;
+
+            // 3. Health Reports: total prescriptions
+            const totalPrescriptions = prescriptions.length;
+
+            document.getElementById('stat-upcoming').textContent = upcomingAppts;
+            document.getElementById('stat-doctors').textContent = uniqueDoctors;
+            document.getElementById('stat-reports').textContent = totalPrescriptions;
+        }
+
         async function loadPatientAppointments() {
             const container1 = document.getElementById('upcoming-appointments-list');
             const container2 = document.getElementById('all-appointments-list');
@@ -1296,7 +1329,12 @@
                 .eq('patient_email', user.email)
                 .order('created_at', { ascending: false });
 
-            if (error || !appts || appts.length === 0) {
+            if (error || !appts) return;
+
+            patientAppts = appts;
+            updatePatientStats(patientAppts, patientPrescriptions);
+
+            if (appts.length === 0) {
                 const emptyHtml = `
                 <div class="panel-card empty-state" style="padding: 2rem 1rem; border: none; background: transparent;">
                     <i class="fas fa-calendar-times" style="font-size: 2rem;"></i>
@@ -1311,7 +1349,7 @@
             let html = '';
             appts.forEach(a => {
                 const badgeClass = a.status === 'Confirmed' ? 'badge-confirmed' : (a.status === 'Declined' ? 'badge-cancelled' : 'badge-pending');
-                const docInitials = a.doctor_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                const docInitials = (a.doctor_name || 'D').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
                 html += `
             <div class="appt-card">
                 <div class="appt-avatar" style="background:linear-gradient(135deg,var(--purple),#8e44ad);">${docInitials}</div>
@@ -1328,18 +1366,25 @@
         }
 
         async function loadRegisteredDoctors() {
-            const container = document.getElementById('registered-doctors-list');
-            if (!container) return;
-
             const { data: doctors, error } = await supabase
                 .from('profiles')
                 .select('*')
                 .eq('role', 'Doctor');
 
-            if (error || !doctors || doctors.length === 0) {
-                const emptyHtml = `<p style="color:var(--muted); font-size:0.85rem; padding: 1rem 0;">No registered doctors found in the system yet.</p>`;
+            if (error || !doctors) return;
+
+            allRegisteredDoctors = doctors;
+            renderDoctorsList(allRegisteredDoctors);
+        }
+
+        function renderDoctorsList(doctors) {
+            const container = document.getElementById('registered-doctors-list');
+            const allDocsContainer = document.getElementById('all-doctors-list');
+            if (!container) return;
+
+            if (doctors.length === 0) {
+                const emptyHtml = `<p style="color:var(--muted); font-size:0.85rem; padding: 1rem 0; text-align: center; width: 100%;">No doctors found.</p>`;
                 container.innerHTML = emptyHtml;
-                const allDocsContainer = document.getElementById('all-doctors-list');
                 if (allDocsContainer) allDocsContainer.innerHTML = emptyHtml;
                 return;
             }
@@ -1350,22 +1395,32 @@
                 const lname = u.last_name || '';
                 const initials = ((fname[0] || '') + (lname[0] || '')).toUpperCase() || 'D';
                 const joinDate = u.joined || 'Recently';
+                const speciality = u.speciality || 'General Consultant';
 
                 html += `
             <div class="appt-card">
                 <div class="appt-avatar" style="background:linear-gradient(135deg,var(--blue),var(--blue-dark));">${initials}</div>
                 <div class="appt-info">
                     <div class="appt-name">Dr. ${fname} ${lname}</div>
-                    <div class="appt-spec">Consultant · Joined ${joinDate}</div>
-                    <div class="appt-time"><i class="fas fa-envelope" style="color:var(--muted);"></i> ${u.email}</div>
+                    <div class="appt-spec">${speciality} · Joined ${joinDate}</div>
+                    <div class="appt-time"><i class="fas fa-envelope" style="color:var(--muted); font-size:0.72rem;"></i> ${u.email}</div>
                 </div>
                 <button onclick="openBookingModal('${u.email}', '${fname} ${lname}')" style="padding:6px 14px;background:rgba(52,152,219,0.15);color:var(--blue);border:1px solid rgba(52,152,219,0.3);border-radius:8px;font-size:0.78rem;font-weight:600;cursor:pointer;">Book</button>
             </div>`;
             });
 
             container.innerHTML = html;
-            const allDocsContainer = document.getElementById('all-doctors-list');
             if (allDocsContainer) allDocsContainer.innerHTML = html;
+        }
+
+        function filterDoctors(query) {
+            const lowerQuery = query.toLowerCase().trim();
+            const filtered = allRegisteredDoctors.filter(doc => {
+                const fullName = `Dr. ${doc.first_name} ${doc.last_name}`.toLowerCase();
+                const spec = (doc.speciality || '').toLowerCase();
+                return fullName.includes(lowerQuery) || spec.includes(lowerQuery);
+            });
+            renderDoctorsList(filtered);
         }
 
         async function loadPatientPrescriptions() {
@@ -1378,7 +1433,12 @@
                 .eq('patient_email', user.email)
                 .order('created_at', { ascending: false });
 
-            if (error || !rxs || rxs.length === 0) {
+            if (error || !rxs) return;
+
+            patientPrescriptions = rxs;
+            updatePatientStats(patientAppts, patientPrescriptions);
+
+            if (rxs.length === 0) {
                 container.innerHTML = `
                 <div class="panel-card empty-state" style="padding: 2rem 1rem; border: none; background: transparent;">
                     <i class="fas fa-file-prescription" style="font-size: 2rem;"></i>
