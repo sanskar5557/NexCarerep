@@ -1182,13 +1182,18 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-client.js"></script>
+    <script src="supabase-client.js?v=5"></script>
     <script>
         function requireAuth() {
             const loggedIn = localStorage.getItem('nexcare_logged_in') === 'true';
             const user = JSON.parse(localStorage.getItem('nexcare_user') || 'null');
             if (!loggedIn || !user) { window.location.href = 'auth.html'; return null; }
             if (user.role && user.role.toLowerCase() === 'doctor') { window.location.href = 'doctor-dashboard.html'; return null; }
+            
+            // Normalize properties
+            if (user.first_name && !user.firstName) user.firstName = user.first_name;
+            if (user.last_name && !user.lastName) user.lastName = user.last_name;
+            
             return user;
         }
 
@@ -1540,6 +1545,16 @@
                 }, 1000);
             }
         }
+
+        // Add event listener to dynamically sync appointments and prescriptions across open browser tabs
+        window.addEventListener('storage', (e) => {
+            if (e.key && e.key.startsWith('mock_')) {
+                loadPatientAppointments();
+                loadPatientPrescriptions();
+                loadProfile();
+                loadRegisteredDoctors();
+            }
+        });
 
         // Call it when the page loads
         if (user) {

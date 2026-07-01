@@ -1471,6 +1471,14 @@
                         Prescription</button>
                 </div>
             </div>
+            
+            <br>
+            <div class="section-hdr"><span class="sec-title">Previous Prescriptions Sent</span></div>
+            <div class="panel" id="previous-prescriptions-list-container">
+                <div id="previous-prescriptions-list" style="display:flex; flex-direction:column; gap:1rem;">
+                    <p style="color:var(--muted); font-size:0.85rem;">Loading history...</p>
+                </div>
+            </div>
         </div>
         <div id="view-earnings" class="tab-pane">
             <div class="section-hdr"><span class="sec-title">Financial Reports</span></div>
@@ -1575,7 +1583,7 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-client.js"></script>
+    <script src="supabase-client.js?v=5"></script>
     <script>
         function requireAuth() {
             const loggedIn = localStorage.getItem('nexcare_logged_in') === 'true';
@@ -2508,7 +2516,7 @@
                     patient_email: patientEmail,
                     patient_name: patientName,
                     notes: text,
-                    date: new Date().toLocaleDateString('en-IN')
+                    date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
                 }]);
 
             if (error) {
@@ -2519,6 +2527,49 @@
             notes.value = '';
             select.value = '';
             alert('Prescription sent successfully!');
+            await loadPreviousPrescriptions();
+        }
+
+        async function loadPreviousPrescriptions() {
+            if (!user || !user.email) return;
+            const container = document.getElementById('previous-prescriptions-list');
+            if (!container) return;
+
+            const { data: rxs, error } = await supabase
+                .from('prescriptions')
+                .select('*')
+                .eq('doctor_email', user.email)
+                .order('created_at', { ascending: false });
+
+            if (error || !rxs) {
+                container.innerHTML = `<p style="color:var(--muted); font-size:0.85rem;">Error loading prescription history.</p>`;
+                return;
+            }
+
+            if (rxs.length === 0) {
+                container.innerHTML = `<p style="color:var(--muted); font-size:0.85rem;">No prescriptions written yet.</p>`;
+                return;
+            }
+
+            let html = '';
+            rxs.forEach(rx => {
+                const safeNotes = (rx.notes || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                html += `
+                <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:10px; padding:1.2rem; display:flex; flex-direction:column; gap:0.6rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:start; flex-wrap:wrap; gap:0.5rem;">
+                        <div>
+                            <div style="font-weight:700; color:var(--text); font-size:0.95rem;">Patient: ${rx.patient_name}</div>
+                            <div style="font-size:0.75rem; color:var(--muted);">${rx.patient_email}</div>
+                        </div>
+                        <div style="font-size:0.75rem; color:var(--muted); text-align:right;">
+                            <div>Date: ${rx.date || 'N/A'}</div>
+                            <div style="font-family:monospace; margin-top:2px;">#RX-${(rx.id || '').substring(0, 8)}</div>
+                        </div>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.03); border-radius:6px; padding:0.8rem; font-size:0.85rem; color:rgba(255,255,255,0.85); white-space:pre-wrap; font-family:serif; font-style:italic; border-left:3px solid var(--blue);">${safeNotes}</div>
+                </div>`;
+            });
+            container.innerHTML = html;
         }
 
         async function loadProfile() {
@@ -2570,10 +2621,20 @@
             }
         }
 
+        // Add event listener to dynamically sync appointments and prescriptions across open browser tabs
+        window.addEventListener('storage', (e) => {
+            if (e.key && e.key.startsWith('mock_')) {
+                loadDoctorAppointments();
+                loadPreviousPrescriptions();
+                populatePrescriptionForm();
+            }
+        });
+
         if (user) {
             loadDoctorAppointments();
             populatePrescriptionForm();
             loadProfile();
+            loadPreviousPrescriptions();
         }
     </script>
 </body>
