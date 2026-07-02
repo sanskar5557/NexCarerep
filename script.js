@@ -46,19 +46,23 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// Animate bars on the market slide when it becomes visible
-const marketSlide = slides[6]; // 7th slide (0-indexed)
-const marketObserver = new IntersectionObserver((entries) => {
-    if (entries[0].isIntersecting) {
-        const bars = entries[0].target.querySelectorAll('.bar');
-        bars.forEach((bar, i) => {
-            // Heights are predefined in HTML style but we can toggle them if needed
-            // For now, let's just re-trigger the CSS transition if we had one
-        });
-    }
-}, observerOptions);
+// Switch tabs in the interactive dashboard simulator preview
+function switchSimTab(type) {
+    document.querySelectorAll('.sim-tab').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.sim-screen').forEach(screen => screen.classList.remove('active'));
 
-if (marketSlide) marketObserver.observe(marketSlide);
+    if (type === 'patient') {
+        const patientTab = document.querySelector('.sim-tab[onclick*="patient"]');
+        if (patientTab) patientTab.classList.add('active');
+        const patientScreen = document.getElementById('sim-patient');
+        if (patientScreen) patientScreen.classList.add('active');
+    } else {
+        const doctorTab = document.querySelector('.sim-tab[onclick*="doctor"]');
+        if (doctorTab) doctorTab.classList.add('active');
+        const doctorScreen = document.getElementById('sim-doctor');
+        if (doctorScreen) doctorScreen.classList.add('active');
+    }
+}
 
 // Dark Mode Toggle
 const themeToggle = document.getElementById('theme-toggle');

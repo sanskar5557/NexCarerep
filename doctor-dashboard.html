@@ -1583,7 +1583,7 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-client.js?v=5"></script>
+    <script src="supabase-client.js?v=6"></script>
     <script>
         function requireAuth() {
             const loggedIn = localStorage.getItem('nexcare_logged_in') === 'true';
@@ -2248,7 +2248,12 @@
 
 
 
-        document.getElementById('history-modal').style.display = 'none';
+        function closeHistoryModal() {
+            const modal = document.getElementById('history-modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
 
         function printPrescription(btn) {
             const rxCard = btn.closest('.a4-prescription');

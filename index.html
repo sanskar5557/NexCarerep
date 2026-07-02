@@ -4,14 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexCare Pitch Deck | Smart Doctor Booking</title>
+    <title>NexCare | Smart Healthcare Portal</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@400;600;700;800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=7">
 </head>
 
 <body>
@@ -21,16 +21,16 @@
             <div class="logo-dot"></div> Nex<span>Care</span>
         </div>
         <div class="nav-links" id="nav-links">
-            <a href="javascript:void(0)" onclick="closeMenu(); scrollToSlide(1)">Problem</a>
-            <a href="javascript:void(0)" onclick="closeMenu(); scrollToSlide(3)">Demo</a>
-            <a href="javascript:void(0)" onclick="closeMenu(); scrollToSlide(4)">Features</a>
-            <a href="javascript:void(0)" onclick="closeMenu(); scrollToSlide(7)">Business</a>
-            <a href="javascript:void(0)" onclick="closeMenu(); scrollToSlide(10)">Team</a>
-            <button class="btn btn-primary btn-sm" onclick="closeMenu(); scrollToSlide(11)">Contact</button>
+            <a href="javascript:void(0)" onclick="closeMenu(); scrollToSlide(1)">Friction</a>
+            <a href="javascript:void(0)" onclick="closeMenu(); scrollToSlide(2)">Patients</a>
+            <a href="javascript:void(0)" onclick="closeMenu(); scrollToSlide(3)">Doctors</a>
+            <a href="javascript:void(0)" onclick="closeMenu(); scrollToSlide(4)">Interactive Demo</a>
+            <a href="javascript:void(0)" onclick="closeMenu(); scrollToSlide(5)">Features</a>
+            <a href="javascript:void(0)" onclick="closeMenu(); scrollToSlide(8)">Team</a>
             <!-- Auth Nav: toggled by JS -->
             <div id="auth-nav-area">
                 <!-- Shown when logged out -->
-                <a href="auth.html" id="nav-login-btn" class="btn btn-primary btn-sm" style="text-decoration:none; background: linear-gradient(135deg,#2ECC71,#27ae60);">Login</a>
+                <a href="auth.html" id="nav-login-btn" class="btn btn-primary btn-sm" style="text-decoration:none; background: linear-gradient(135deg,#2ECC71,#27ae60);">Login / Register</a>
                 <!-- Shown when logged in -->
                 <div id="nav-profile-btn" style="display:none; position:relative;">
                     <button id="profile-avatar-btn" onclick="toggleProfileDropdown()" title="My Profile">
@@ -82,26 +82,30 @@
         <div class="nav-dot" onclick="scrollToSlide(7)"></div>
         <div class="nav-dot" onclick="scrollToSlide(8)"></div>
         <div class="nav-dot" onclick="scrollToSlide(9)"></div>
-        <div class="nav-dot" onclick="scrollToSlide(10)"></div>
-        <div class="nav-dot" onclick="scrollToSlide(11)"></div>
     </div>
 
     <div class="deck-container" id="deck">
 
-        <!-- Slide 1: Cover -->
+        <!-- Slide 1: Hero Cover -->
         <section class="slide" id="slide-cover">
             <div class="content">
-                <div class="text-side">
-                    <span class="tagline">The Digital Health Revolution</span>
-                    <h1>Smart Doctor Booking.<br>Faster. Simpler.</h1>
-                    <p>Connecting patients with verified doctors in seconds, not hours. A friction-less healthcare
-                        experience for the modern world.</p>
+                <div class="text-side animate-fade-in-left">
+                    <span class="tagline gradient-text">Next-Gen Care Hub</span>
+                    <h1>Smart Healthcare Portal.<br>Unified & Frictionless.</h1>
+                    <p>Experience the future of medical appointments. A dual-sided platform connecting Patients and Doctors in real-time with zero friction, automated scheduling, and instantly accessible health records.</p>
+                    <div class="hero-cta-buttons" style="display: flex; gap: 1rem; margin-top: 2rem;">
+                        <a href="auth.html" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-user-injured"></i> Patient Portal
+                        </a>
+                        <a href="auth.html" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-user-doctor"></i> Doctor Portal
+                        </a>
+                    </div>
                 </div>
-                <div class="image-side">
-                    <!-- Replace with generated image if available, else CSS mockup -->
-                    <div class="iphone-frame">
+                <div class="image-side animate-fade-in-right">
+                    <div class="iphone-frame animate-float">
                         <div class="iphone-screen">
-                            <img src="nexcare_cover_mockup_1776426407868.png" alt="NexCare App"
+                            <img src="nexcare_cover_mockup_1776426407868.png" alt="NexCare App UI"
                                 style="width: 100%; height: 100%; object-fit: cover;">
                         </div>
                     </div>
@@ -109,312 +113,314 @@
             </div>
         </section>
 
-        <!-- Slide 2: Problem -->
+        <!-- Slide 2: Problem & Friction -->
         <section class="slide">
-            <h2>The Healthcare Friction</h2>
-            <div class="grid grid-3">
-                <div class="card">
-                    <div class="icon-box"><i class="fas fa-clock"></i></div>
-                    <h3>Long Waiting Times</h3>
-                    <p>Patients spend an average of 45 minutes in waiting rooms despite having appointments.</p>
-                </div>
-                <div class="card">
-                    <div class="icon-box"><i class="fas fa-calendar-xmark"></i></div>
-                    <h3>No Sync Slots</h3>
-                    <p>Traditional booking via calls leads to double-bookings and manual errors.</p>
-                </div>
-                <div class="card">
-                    <div class="icon-box"><i class="fas fa-user-shield"></i></div>
-                    <h3>Trust Gap</h3>
-                    <p>Hard to find verified reviews and transparent pricing for local practitioners.</p>
-                </div>
+            <div class="slide-header">
+                <span class="tagline">The Current Reality</span>
+                <h2>The Healthcare Friction</h2>
             </div>
-        </section>
-
-        <!-- Slide 3: Solution -->
-        <section class="slide">
-            <h2>The NexCare Way</h2>
             <div class="grid grid-2">
-                <div class="card solution-card" style="border-left: 5px solid #e74c3c;">
-                    <span class="tagline" style="color: #e74c3c;">The Old Way</span>
-                    <ul>
-                        <li>Call multiple clinics</li>
-                        <li>Ask for availability</li>
-                        <li>Wait on-site for hours</li>
-                        <li>Manual paper records</li>
+                <!-- Patient Problems -->
+                <div class="card glass-card border-glow-red">
+                    <div class="card-title-with-icon">
+                        <div class="icon-box red"><i class="fas fa-circle-xmark"></i></div>
+                        <h3>Patient Pain Points</h3>
+                    </div>
+                    <ul class="benefit-list">
+                        <li><i class="fas fa-minus"></i> Spending hours in crowded waiting rooms</li>
+                        <li><i class="fas fa-minus"></i> Calling multiple clinics for scheduling availability</li>
+                        <li><i class="fas fa-minus"></i> Misplacing paper prescriptions and physical records</li>
+                        <li><i class="fas fa-minus"></i> Unclear doctor specialities and consultation fees</li>
                     </ul>
                 </div>
-                <div class="card solution-card" style="border-left: 5px solid var(--primary-green);">
-                    <span class="tagline" style="color: var(--primary-green);">NexCare Solution</span>
-                    <ul>
-                        <li>One-tap search & filter</li>
-                        <li>Real-time slot tracking</li>
-                        <li>Zero-wait arrival system</li>
-                        <li>Unified digital health IDs</li>
+                <!-- Doctor Problems -->
+                <div class="card glass-card border-glow-orange">
+                    <div class="card-title-with-icon">
+                        <div class="icon-box orange"><i class="fas fa-circle-exclamation"></i></div>
+                        <h3>Doctor Pain Points</h3>
+                    </div>
+                    <ul class="benefit-list">
+                        <li><i class="fas fa-minus"></i> Fragmented calendars and phone-in booking chaos</li>
+                        <li><i class="fas fa-minus"></i> Time spent filling out repetitive manual history</li>
+                        <li><i class="fas fa-minus"></i> No easy way to update availability or slots in real-time</li>
+                        <li><i class="fas fa-minus"></i> Lack of instant analytics for daily earnings and ratings</li>
                     </ul>
                 </div>
             </div>
         </section>
 
-        <!-- Slide 4: Product Demo -->
+        <!-- Slide 3: Patients Perspective Pros -->
         <section class="slide">
-            <h2>Seamless User Flow</h2>
-            <div class="flex-center" style="gap: 2rem;">
-                <div class="iphone-frame small">
-                    <div class="iphone-screen">
-                        <div class="app-header">
-                            <div class="logo-text" style="font-size: 1rem; margin-bottom: 0.5rem;">Nex<span>Care</span>
+            <div class="slide-header">
+                <span class="tagline">Patient Perspective</span>
+                <h2>Smarter & Faster Patient Care</h2>
+            </div>
+            <div class="grid grid-3">
+                <div class="card glass-card hover-glow-green">
+                    <div class="icon-box green"><i class="fas fa-bolt"></i></div>
+                    <h3>1-Tap Booking</h3>
+                    <p>Find nearby verified specialist doctors and request a confirmed time slot in less than 30 seconds.</p>
+                </div>
+                <div class="card glass-card hover-glow-green">
+                    <div class="icon-box green"><i class="fas fa-clock"></i></div>
+                    <h3>Zero Waiting Time</h3>
+                    <p>Get instant updates on appointment approvals and status, making clinical visits smooth and predictable.</p>
+                </div>
+                <div class="card glass-card hover-glow-green">
+                    <div class="icon-box green"><i class="fas fa-file-pdf"></i></div>
+                    <h3>Printable E-Prescriptions</h3>
+                    <p>Access and print digital prescriptions generated in standard A4 format directly from your health records tab.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 4: Doctors Perspective Pros -->
+        <section class="slide">
+            <div class="slide-header">
+                <span class="tagline">Doctor Perspective</span>
+                <h2>Seamless Practice Management</h2>
+            </div>
+            <div class="grid grid-3">
+                <div class="card glass-card hover-glow-blue">
+                    <div class="icon-box blue"><i class="fas fa-calendar-check"></i></div>
+                    <h3>Smart Calendar Sync</h3>
+                    <p>Track your schedule with an integrated calendar and accept/decline booking requests instantly.</p>
+                </div>
+                <div class="card glass-card hover-glow-blue">
+                    <div class="icon-box blue"><i class="fas fa-file-medical"></i></div>
+                    <h3>Rapid RX Builder</h3>
+                    <p>Write prescriptions digitally using our fast prescription form. Patient details are auto-populated.</p>
+                </div>
+                <div class="card glass-card hover-glow-blue">
+                    <div class="icon-box blue"><i class="fas fa-chart-pie"></i></div>
+                    <h3>Practice Analytics</h3>
+                    <p>Monitor your performance with key stats including daily appointments, rating trends, and monthly earnings.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 5: Interactive Simulator Demo -->
+        <section class="slide" id="slide-demo">
+            <div class="slide-header">
+                <span class="tagline">Interactive Preview</span>
+                <h2>Experience the Dashboards</h2>
+            </div>
+            <div class="simulator-wrapper">
+                <div class="simulator-tabs">
+                    <button class="sim-tab active" onclick="switchSimTab('patient')"><i class="fas fa-user-injured"></i> Patient Dashboard</button>
+                    <button class="sim-tab" onclick="switchSimTab('doctor')"><i class="fas fa-user-doctor"></i> Doctor Dashboard</button>
+                </div>
+                <div class="simulator-screen-container glass-card">
+                    <!-- Patient Simulated Dashboard -->
+                    <div class="sim-screen active" id="sim-patient">
+                        <div class="sim-topbar">
+                            <div class="sim-title">Jane Smith (Patient Portal)</div>
+                            <div class="sim-badges">
+                                <span class="badge badge-green">Health Score: 98%</span>
                             </div>
-                            <div class="search-bar"><i class="fas fa-search"></i> Search Cardiologist...</div>
                         </div>
-                        <div style="padding: 1rem;">
-                            <p style="font-size: 0.7rem; font-weight: 600;">Top Doctors</p>
-                            <div style="height: 60px; background: #f8fafc; margin-top: 10px; border-radius: 8px;"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="flow-arrow"><i class="fas fa-chevron-right"></i></div>
-                <div class="iphone-frame small">
-                    <div class="iphone-screen" style="padding: 1rem;">
-                        <p style="font-size: 0.8rem; font-weight: 600;">Select Time Slot</p>
-                        <div class="grid grid-3" style="margin-top: 1rem; gap: 0.5rem;">
-                            <div
-                                style="background: var(--bg-light-blue); font-size: 0.6rem; padding: 5px; text-align: center; border-radius: 4px;">
-                                09:00 AM</div>
-                            <div
-                                style="background: var(--primary-blue); color: white; font-size: 0.6rem; padding: 5px; text-align: center; border-radius: 4px;">
-                                10:30 AM</div>
+                        <div class="sim-body">
+                            <div class="sim-stats">
+                                <div class="sim-stat"><div class="val">1</div><div class="lbl">Upcoming Appt</div></div>
+                                <div class="sim-stat"><div class="val">3</div><div class="lbl">Doctors Consulted</div></div>
+                                <div class="sim-stat"><div class="val">2</div><div class="lbl">Health Records</div></div>
+                            </div>
+                            <div class="sim-card-list">
+                                <div class="sim-item">
+                                    <div class="avatar-circle">JD</div>
+                                    <div class="info">
+                                        <div class="name">Dr. John Doe (Cardiologist)</div>
+                                        <div class="desc"><i class="fas fa-clock"></i> Today @ 10:00 AM</div>
+                                    </div>
+                                    <span class="status-pill confirmed">Confirmed</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="flow-arrow"><i class="fas fa-chevron-right"></i></div>
-                <div class="iphone-frame small">
-                    <div class="iphone-screen flex-center" style="flex-direction: column;">
-                        <div class="icon-box green" style="width: 40px; height: 40px; font-size: 18px;"><i
-                                class="fas fa-check"></i></div>
-                        <p style="font-size: 0.8rem; font-weight: 600;">Booking Confirmed!</p>
+                    <!-- Doctor Simulated Dashboard -->
+                    <div class="sim-screen" id="sim-doctor">
+                        <div class="sim-topbar">
+                            <div class="sim-title">Dr. John Doe (Doctor Portal)</div>
+                            <div class="sim-badges">
+                                <span class="badge badge-blue">Rating: 4.9 ★</span>
+                            </div>
+                        </div>
+                        <div class="sim-body">
+                            <div class="sim-stats">
+                                <div class="sim-stat"><div class="val">1</div><div class="lbl">Today's Appts</div></div>
+                                <div class="sim-stat"><div class="val">4</div><div class="lbl">Total Patients</div></div>
+                                <div class="sim-stat"><div class="val">₹2,500</div><div class="lbl">This Month</div></div>
+                            </div>
+                            <div class="sim-card-list">
+                                <div class="sim-item">
+                                    <div class="avatar-circle green">JS</div>
+                                    <div class="info">
+                                        <div class="name">Jane Smith</div>
+                                        <div class="desc">Consultation: 10:00 AM</div>
+                                    </div>
+                                    <div class="actions">
+                                        <span class="status-pill pending">Pending Request</span>
+                                        <button class="sim-btn accept-btn" onclick="alert('Demo: Request Accepted!')">Accept</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Slide 5: Features -->
+        <!-- Slide 6: Platform Features Grid -->
         <section class="slide">
-            <h2>Core Features</h2>
+            <div class="slide-header">
+                <span class="tagline">Built-in Power</span>
+                <h2>NexCare Platform Core</h2>
+            </div>
             <div class="grid grid-3">
-                <div class="feature-item">
-                    <div class="icon-box"><i class="fas fa-bolt"></i></div>
-                    <h3>Smart Booking</h3>
-                    <p>AI-driven slot allocation.</p>
+                <div class="feature-item glass-card">
+                    <div class="icon-box green"><i class="fas fa-shield-halved"></i></div>
+                    <h3>Secure & Encrypted</h3>
+                    <p>All database queries and patient metadata are encrypted to guarantee absolute confidentiality.</p>
                 </div>
-                <div class="feature-item">
-                    <div class="icon-box green"><i class="fas fa-location-dot"></i></div>
-                    <h3>Nearby Doctors</h3>
-                    <p>Hyper-local search results.</p>
+                <div class="feature-item glass-card">
+                    <div class="icon-box green"><i class="fas fa-rotate"></i></div>
+                    <h3>Cross-Tab Real-time Sync</h3>
+                    <p>Changes in patient bookings propagate instantly to the doctor's calendar without needing page reloads.</p>
                 </div>
-                <div class="feature-item">
-                    <div class="icon-box"><i class="fas fa-star"></i></div>
-                    <h3>Verified Reviews</h3>
-                    <p>100% authentic feedback.</p>
+                <div class="feature-item glass-card">
+                    <div class="icon-box green"><i class="fas fa-cloud-arrow-down"></i></div>
+                    <h3>Offline Cache Fallback</h3>
+                    <p>Our intelligent client database operates gracefully offline via local browser cache if connection drops.</p>
                 </div>
-                <div class="feature-item">
-                    <div class="icon-box green"><i class="fas fa-message"></i></div>
-                    <h3>In-app Chat</h3>
-                    <p>Instant doctor consultation.</p>
+                <div class="feature-item glass-card">
+                    <div class="icon-box green"><i class="fas fa-magnifying-glass-location"></i></div>
+                    <h3>Dynamic Search Filters</h3>
+                    <p>Search doctors instantly by speciality, clinic location, or availability slots with zero-lag filters.</p>
                 </div>
-                <div class="feature-item">
-                    <div class="icon-box"><i class="fas fa-bell"></i></div>
-                    <h3>Reminders</h3>
-                    <p>Automated SMS & Push alerts.</p>
+                <div class="feature-item glass-card">
+                    <div class="icon-box green"><i class="fas fa-print"></i></div>
+                    <h3>Standardized Reports</h3>
+                    <p>Generate clean, professional medical reports and prescriptions optimized for local printing.</p>
                 </div>
-                <div class="feature-item">
-                    <div class="icon-box green"><i class="fas fa-file-medical"></i></div>
-                    <h3>Digital Records</h3>
-                    <p>Access history anywhere.</p>
+                <div class="feature-item glass-card">
+                    <div class="icon-box green"><i class="fas fa-heart-pulse"></i></div>
+                    <h3>Status Tracking</h3>
+                    <p>Monitor patient health metrics and historical data chronologically inside a unified timeline.</p>
                 </div>
             </div>
         </section>
 
-        <!-- Slide 6: How It Works -->
+        <!-- Slide 7: Appointment Journey -->
         <section class="slide">
-            <h2>The Journey</h2>
-            <div class="flex-center" style="margin-top: 4rem; position: relative;">
-                <div class="step-line"
-                    style="position: absolute; height: 2px; width: 80%; background: var(--border-color); z-index: 1;">
-                </div>
+            <div class="slide-header">
+                <span class="tagline">Simple Workflow</span>
+                <h2>The Patient & Doctor Journey</h2>
+            </div>
+            <div class="flex-center" style="margin-top: 2rem; position: relative;">
+                <div class="step-line"></div>
                 <div class="grid grid-4" style="width: 100%; z-index: 2;">
-                    <div class="step-item flex-center" style="flex-direction: column;">
+                    <div class="step-item flex-center">
                         <div class="step-circle active">1</div>
-                        <h3>Search</h3>
+                        <h3>Explore</h3>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); text-align:center;">Patients search and view available local doctors.</p>
                     </div>
-                    <div class="step-item flex-center" style="flex-direction: column;">
+                    <div class="step-item flex-center">
                         <div class="step-circle active">2</div>
-                        <h3>Book</h3>
+                        <h3>Reserve</h3>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); text-align:center;">Select dates and book a requested slot instantly.</p>
                     </div>
-                    <div class="step-item flex-center" style="flex-direction: column;">
+                    <div class="step-item flex-center">
                         <div class="step-circle active">3</div>
-                        <h3>Visit</h3>
+                        <h3>Approve</h3>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); text-align:center;">Doctors review and confirm the booking in real-time.</p>
                     </div>
-                    <div class="step-item flex-center" style="flex-direction: column;">
+                    <div class="step-item flex-center">
                         <div class="step-circle active">4</div>
-                        <h3>Follow-up</h3>
+                        <h3>Consult</h3>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); text-align:center;">Generate digital prescriptions during consultation.</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Slide 7: Market Opportunity -->
+        <!-- Slide 8: Business Value Proposition -->
         <section class="slide">
-            <h2>Market Opportunity</h2>
+            <div class="slide-header">
+                <span class="tagline">Why Partner With Us</span>
+                <h2>Platform Value Proposition</h2>
+            </div>
             <div class="grid grid-2">
-                <div class="market-stats">
-                    <div class="stat-box">
-                        <h1 class="stat-value">$350B</h1>
-                        <p>Global Health-Tech Market by 2028</p>
-                    </div>
-                    <div class="stat-box" style="margin-top: 2rem;">
-                        <h2 class="stat-value green">+25%</h2>
-                        <p>YOY Growth in Digital Booking</p>
-                    </div>
+                <div class="card glass-card hover-glow-green">
+                    <div class="icon-box green"><i class="fas fa-users-viewfinder"></i></div>
+                    <h3>For Patients</h3>
+                    <ul class="benefit-list">
+                        <li><i class="fas fa-check-circle" style="color:var(--primary-green);"></i> Completely free medical appointment request tool</li>
+                        <li><i class="fas fa-check-circle" style="color:var(--primary-green);"></i> Digital directory of verified healthcare professionals</li>
+                        <li><i class="fas fa-check-circle" style="color:var(--primary-green);"></i> Secure access to historical reports and prescriptions</li>
+                    </ul>
                 </div>
-                <div class="chart-box flex-center">
-                    <div class="mock-chart">
-                        <!-- CSS Bar Chart -->
-                        <div class="bar" style="height: 40%;"></div>
-                        <div class="bar" style="height: 60%;"></div>
-                        <div class="bar" style="height: 85%;"></div>
-                        <div class="bar highlighted" style="height: 100%;"></div>
-                    </div>
+                <div class="card glass-card hover-glow-blue">
+                    <div class="icon-box blue"><i class="fas fa-hospital-user"></i></div>
+                    <h3>For Medical Practices</h3>
+                    <ul class="benefit-list">
+                        <li><i class="fas fa-check-circle" style="color:var(--primary-blue);"></i> Flexible premium scheduler subscription plans</li>
+                        <li><i class="fas fa-check-circle" style="color:var(--primary-blue);"></i> Free up administrative reception bandwidth by 70%</li>
+                        <li><i class="fas fa-check-circle" style="color:var(--primary-blue);"></i> Increase appointment retention with automated indicators</li>
+                    </ul>
                 </div>
             </div>
         </section>
 
-        <!-- Slide 8: Business Model -->
+        <!-- Slide 9: Visionary Team -->
         <section class="slide">
-            <h2>Sustainable Revenue</h2>
+            <div class="slide-header">
+                <span class="tagline">The Creators</span>
+                <h2>Our Visionary Team</h2>
+            </div>
             <div class="grid grid-3">
-                <div class="card">
-                    <div class="icon-box green"><i class="fas fa-hand-holding-dollar"></i></div>
-                    <h3>Commissions</h3>
-                    <p>10-15% per successful booking through our platform.</p>
-                </div>
-                <div class="card">
-                    <div class="icon-box"><i class="fas fa-user-doctor"></i></div>
-                    <h3>Subscriptions</h3>
-                    <p>Premium SaaS dashboard for clinic management.</p>
-                </div>
-                <div class="card">
-                    <div class="icon-box green"><i class="fas fa-bullhorn"></i></div>
-                    <h3>Featured Listings</h3>
-                    <p>Priority ranking for doctors to increase visibility.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Slide 9: Competitive Comparison -->
-        <section class="slide">
-            <h2>Why NexCare?</h2>
-            <table class="comparison-table">
-                <thead>
-                    <tr>
-                        <th>Feature</th>
-                        <th>NexCare</th>
-                        <th>Competitors</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Booking Speed</td>
-                        <td><i class="fas fa-check-circle" style="color: var(--primary-green);"></i>
-                            < 30s</td>
-                        <td><i class="fas fa-times-circle" style="color: #ccc;"></i> 3-5 Mins</td>
-                    </tr>
-                    <tr>
-                        <td>UI Complexity</td>
-                        <td>Minimal & Fast</td>
-                        <td>Cluttered / Heavy</td>
-                    </tr>
-                    <tr>
-                        <td>Slot Sync</td>
-                        <td>Real-time Hub</td>
-                        <td>Manual/Delayed</td>
-                    </tr>
-                </tbody>
-            </table>
-        </section>
-
-        <!-- Slide 10: Roadmap -->
-        <section class="slide">
-            <h2>Roadmap 2026-27</h2>
-            <div class="roadmap-line">
-                <div class="roadmap-point">
-                    <div class="point-circle"></div>
-                    <h3>MVP</h3>
-                    <p>Core Booking App</p>
-                </div>
-                <div class="roadmap-point">
-                    <div class="point-circle"></div>
-                    <h3>Growth</h3>
-                    <p>Multi-city Expansion</p>
-                </div>
-                <div class="roadmap-point">
-                    <div class="point-circle"></div>
-                    <h3>Scale</h3>
-                    <p>Pharmacy Integration</p>
-                </div>
-                <div class="roadmap-point">
-                    <div class="point-circle"></div>
-                    <h3>Advanced</h3>
-                    <p>AI Diagnosis Suite</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Slide 11: Team -->
-        <section class="slide">
-            <h2>The Visionaries</h2>
-            <div class="grid grid-3">
-                <div class="card text-center">
-                    <div class="avatar"></div>
+                <div class="card glass-card text-center">
+                    <div class="avatar" style="background: linear-gradient(135deg, #3498db, #2ecc71); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 2rem;">AR</div>
                     <h3>Alex Rivera</h3>
                     <p>CEO & Founder</p>
-                    <div class="skills">Ex-Healthify, MBA</div>
+                    <div class="skills" style="font-size:0.75rem; color:var(--primary-green); font-weight:600; margin-top:0.5rem; text-transform:uppercase;">Ex-Healthify, MBA</div>
                 </div>
-                <div class="card text-center">
-                    <div class="avatar"></div>
+                <div class="card glass-card text-center">
+                    <div class="avatar" style="background: linear-gradient(135deg, #9b59b6, #e74c3c); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 2rem;">SC</div>
                     <h3>Dr. Sarah Chen</h3>
                     <p>Medical Director</p>
-                    <div class="skills">15+ Years Clinical Exp</div>
+                    <div class="skills" style="font-size:0.75rem; color:var(--primary-green); font-weight:600; margin-top:0.5rem; text-transform:uppercase;">15+ Years Clinical Exp</div>
                 </div>
-                <div class="card text-center">
-                    <div class="avatar"></div>
+                <div class="card glass-card text-center">
+                    <div class="avatar" style="background: linear-gradient(135deg, #f1c40f, #e67e22); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 2rem;">SJ</div>
                     <h3>Sam Jordan</h3>
                     <p>CTO</p>
-                    <div class="skills">Full Stack Architect</div>
+                    <div class="skills" style="font-size:0.75rem; color:var(--primary-green); font-weight:600; margin-top:0.5rem; text-transform:uppercase;">Full Stack Architect</div>
                 </div>
             </div>
         </section>
 
-        <!-- Slide 12: Final CTA -->
+        <!-- Slide 10: Final CTA -->
         <section class="slide flex-center" style="text-align: center;">
-            <div class="final-content">
+            <div class="final-content animate-fade-in">
+                <span class="tagline gradient-text">Join NexCare Today</span>
                 <h1>Ready to heal the booking experience?</h1>
-                <p style="font-size: 1.5rem; margin-bottom: 3rem;">Let’s build the future of healthcare booking
-                    together.</p>
-                <div class="flex-center" style="gap: 2rem;">
-                    <div class="contact-info">
-                        <p><i class="fas fa-envelope"></i> invest@nexcare.tech</p>
-                        <p><i class="fas fa-globe"></i> www.nexcare.tech</p>
-                    </div>
+                <p style="font-size: 1.3rem; margin-bottom: 2rem; max-width: 700px; margin-left: auto; margin-right: auto;">Step into the modern age of digital medicine. Get started today by registering a patient or doctor account in just a few taps.</p>
+                <div class="flex-center" style="gap: 1.5rem; flex-wrap: wrap;">
+                    <a href="auth.html" class="btn btn-primary" style="transform: scale(1.15); text-decoration: none;">
+                        Create Your Account
+                    </a>
                 </div>
-                <button class="btn btn-primary" style="margin-top: 3rem; transform: scale(1.2);">Join the
-                    Journey</button>
+                <div class="contact-info" style="margin-top: 3.5rem; opacity: 0.8; font-size: 0.9rem;">
+                    <span><i class="fas fa-envelope"></i> contact@nexcare.tech</span>
+                    <span style="margin: 0 1.5rem;">|</span>
+                    <span><i class="fas fa-globe"></i> nexcare.tech</span>
+                </div>
             </div>
         </section>
 
     </div>
 
-    <script src="script.js"></script>
+    <script src="script.js?v=6"></script>
 </body>
 
 </html>
